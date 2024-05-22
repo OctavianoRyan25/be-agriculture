@@ -1,5 +1,7 @@
 github.com/OctavianoRyan25/lapor-lingkungan-hidup v0.0.0-20240514094844-afe8f569505e h1:BoBNwbOWti4ilda0vZF2SveyDhEWDx0XLo+2Y3ddytU=
 github.com/OctavianoRyan25/lapor-lingkungan-hidup v0.0.0-20240514094844-afe8f569505e/go.mod h1:Zp90zd3O6FRZpv5Mhn5I5y9uVq/LTbw8E46okFqht3s=
+github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 h1:DklsrG3dyBCFEj5IhUbnKptjxatkF07cF2ak3yi77so=
+github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2/go.mod h1:WaHUgvxTVq04UNunO+XhnAqY/wQc+bxr74GqbsZ/Jqw=
 github.com/cloudinary/cloudinary-go/v2 v2.7.0 h1:8Fuh/SOen6IQgqH8CLso2E+kuKi2xjbdiyXOspwXFTM=
 github.com/cloudinary/cloudinary-go/v2 v2.7.0/go.mod h1:jtSxa6xbzvu4IwChRJVDcXwVXrTRczhbvq3Z1VSoFdk=
 github.com/creasty/defaults v1.5.1 h1:j8WexcS3d/t4ZmllX4GEkl4wIB/trOr035ajcLHCISM=
