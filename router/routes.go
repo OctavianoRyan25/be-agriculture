@@ -17,7 +17,7 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB) {
 	climateConditionHandler := handler.NewClimateConditionHandler(climateConditionService)
 
 	plantRepository := plant.NewPlantRepository(db)
-	plantService := plant.NewPlantService(plantRepository)
+	plantService := plant.NewPlantService(plantRepository, plantCategoryRepository, climateConditionRepository)
 	plantHandler := handler.NewPlantHandler(plantService)
 
 	v1 := e.Group("/api/v1")

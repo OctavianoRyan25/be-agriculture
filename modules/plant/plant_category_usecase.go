@@ -41,7 +41,8 @@ func (s *plantCategoryService) FindByID(id int) (PlantCategoryClimateResponse, e
 
 func (s *plantCategoryService) Create(input PlantCategoryClimateInput) (PlantCategoryClimateResponse, error) {
 	category := PlantCategory{
-		Name: input.Name,
+		Name:     input.Name,
+		ImageURL: input.ImageURL,
 	}
 
 	newCategory, err := s.repository.Create(category)
@@ -59,6 +60,7 @@ func (s *plantCategoryService) Update(id int, input PlantCategoryClimateInput) (
 	}
 
 	category.Name = input.Name
+	category.ImageURL = input.ImageURL
 
 	updatedCategory, err := s.repository.Update(category)
 	if err != nil {

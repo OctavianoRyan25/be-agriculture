@@ -5,8 +5,8 @@ import "gorm.io/gorm"
 type PlantRepository interface {
 	FindAll() ([]Plant, error)
 	FindByID(id int) (Plant, error)
-	Create(plant CreatePlantInput) (Plant, error)
-	Update(id int, plant CreatePlantInput) (Plant, error)
+	Create(plant Plant) (Plant, error)
+	Update(plant Plant) (Plant, error)
 	Delete(id int) (Plant, error)
 }
 
@@ -20,71 +20,35 @@ func NewPlantRepository(db *gorm.DB) PlantRepository {
 
 func (r *plantRepository) FindAll() ([]Plant, error) {
 	var plants []Plant
-	err := r.db.Preload("PlantCategory").Preload("ClimateCondition").Preload("PlantImages").Find(&plants).Error
+	err := r.db.Preload("PlantCategory").Preload("ClimateCondition").Preload("WateringSchedule").
+		Preload("PlantInstructions").Preload("PlantFAQs").Preload("PlantImages").Find(&plants).Error
 	return plants, err
 }
 
 func (r *plantRepository) FindByID(id int) (Plant, error) {
 	var plant Plant
-	err := r.db.Preload("PlantCategory").Preload("ClimateCondition").Preload("PlantImages").First(&plant, id).Error
+	err := r.db.Preload("PlantCategory").Preload("ClimateCondition").Preload("WateringSchedule").
+		Preload("PlantInstructions").Preload("PlantFAQs").Preload("PlantImages").First(&plant, id).Error
 	return plant, err
 }
 
-func (r *plantRepository) Create(plant CreatePlantInput) (Plant, error) {
-	newPlant := Plant{
-			Name:               plant.Name,
-			Description:        plant.Description,
-			IsToxic:            plant.IsToxic,
-			HarvestDuration:    plant.HarvestDuration,
-			PlantCategoryID:    plant.PlantCategoryID,
-			ClimateConditionID: plant.ClimateConditionID,
-	}
 
-	err := r.db.Create(&newPlant).Error
-	if err != nil {
-			return Plant{}, err
-	}
-
-	if err := r.db.Preload("PlantCategory").Preload("ClimateCondition").Preload("PlantImages").First(&newPlant, newPlant.ID).Error; err != nil {
-			return Plant{}, err
-	}
-
-	return newPlant, nil
+func (r *plantRepository) Create(plant Plant) (Plant, error) {
+	err := r.db.Create(&plant).Error
+	return plant, err
 }
 
-func (r *plantRepository) Update(id int, plant CreatePlantInput) (Plant, error) {
-	var existingPlant Plant
-	if err := r.db.First(&existingPlant, id).Error; err != nil {
-			return Plant{}, err
-	}
-
-	existingPlant.Name = plant.Name
-	existingPlant.Description = plant.Description
-	existingPlant.IsToxic = plant.IsToxic
-	existingPlant.HarvestDuration = plant.HarvestDuration
-	existingPlant.PlantCategoryID = plant.PlantCategoryID
-	existingPlant.ClimateConditionID = plant.ClimateConditionID
-
-	if err := r.db.Save(&existingPlant).Error; err != nil {
-			return Plant{}, err
-	}
-
-	if err := r.db.Preload("PlantCategory").Preload("ClimateCondition").Preload("PlantImages").First(&existingPlant, existingPlant.ID).Error; err != nil {
-			return Plant{}, err
-	}
-
-	return existingPlant, nil
+func (r *plantRepository) Update(plant Plant) (Plant, error) {
+	err := r.db.Save(&plant).Error
+	return plant, err
 }
 
 func (r *plantRepository) Delete(id int) (Plant, error) {
 	var plant Plant
-	if err := r.db.Preload("PlantCategory").Preload("ClimateCondition").Preload("PlantImages").First(&plant, id).Error; err != nil {
-			return Plant{}, err
+	err := r.db.First(&plant, id).Error
+	if err != nil {
+		return plant, err
 	}
-
-	if err := r.db.Delete(&plant).Error; err != nil {
-			return Plant{}, err
-	}
-
-	return plant, nil
+	err = r.db.Delete(&plant).Error
+	return plant, err
 }

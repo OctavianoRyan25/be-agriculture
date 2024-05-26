@@ -53,7 +53,7 @@ func (h *PlantHandler) Create(c echo.Context) error {
 	}
 
 	validate := validator.New()
-	if err := validate.Struct(request); err != nil {
+	if err := validate.Struct(&request); err != nil {
 		errors := helper.FormatValidationError(err)
 		response := helper.APIResponse(strings.Join(errors, ", "), http.StatusBadRequest, "error", nil)
 		return c.JSON(http.StatusBadRequest, response)
@@ -83,7 +83,7 @@ func (h *PlantHandler) Update(c echo.Context) error {
 	}
 
 	validate := validator.New()
-	if err := validate.Struct(input); err != nil {
+	if err := validate.Struct(&input); err != nil {
 			errors := helper.FormatValidationError(err)
 			response := helper.APIResponse("Validation error", http.StatusBadRequest, "error", errors)
 			return c.JSON(http.StatusBadRequest, response)

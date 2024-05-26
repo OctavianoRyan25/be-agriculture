@@ -41,7 +41,8 @@ func (s *climateConditionService) FindByID(id int) (PlantCategoryClimateResponse
 
 func (s *climateConditionService) Create(input PlantCategoryClimateInput) (PlantCategoryClimateResponse, error) {
 	condition := ClimateCondition{
-		Name: input.Name,
+		Name:     input.Name,
+		ImageURL: input.ImageURL,
 	}
 
 	newCondition, err := s.repository.Create(condition)
@@ -59,6 +60,7 @@ func (s *climateConditionService) Update(id int, input PlantCategoryClimateInput
 	}
 
 	condition.Name = input.Name
+	condition.ImageURL = input.ImageURL
 	updatedCondition, err := s.repository.Update(condition)
 	if err != nil {
 		return PlantCategoryClimateResponse{}, err
