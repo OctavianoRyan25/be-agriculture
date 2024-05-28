@@ -16,10 +16,10 @@ func InitDB() (*gorm.DB, error) {
 	// dbName := os.Getenv("DB_NAME")
 
 	dbUser := "root"
-	dbPass := "@Demin123#"
+	dbPass := ""
 	dbHost := "localhost"
 	dbPort := "3306"
-	dbName := "test_capstone"
+	dbName := ""
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
 	//dsn := "root:@tcp(localhost:3306)/minpro?charset=utf8mb4&parseTime=True&loc=Local"

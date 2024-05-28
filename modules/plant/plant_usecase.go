@@ -15,9 +15,6 @@ type PlantService interface {
 type plantService struct {
 	repository             PlantRepository
 	plantCategoryRepository PlantCategoryRepository
-
-	// Sementara gadipake karena katanya mau statis
-	// climateConditionRepository ClimateConditionRepository
 }
 
 func NewPlantService(repository PlantRepository, plantCategoryRepository PlantCategoryRepository) PlantService {
@@ -53,13 +50,6 @@ func (s *plantService) CreatePlant(input CreatePlantInput) (PlantResponse, error
 		return PlantResponse{}, err
 	}
 
-	// Sementara gadipake karena katanya mau statis
-
-	// condition, err := s.climateConditionRepository.FindByID(input.ClimateConditionID)
-	// if err != nil {
-	// 	return PlantResponse{}, err
-	// }
-
 	plant := Plant{
 		Name:               input.Name,
 		Description:        input.Description,
@@ -91,10 +81,6 @@ func (s *plantService) CreatePlant(input CreatePlantInput) (PlantResponse, error
 			WeatherCondition:    input.WateringSchedule.WeatherCondition,
 			ConditionDescription: input.WateringSchedule.ConditionDescription,
 		},
-		
-		// Sementara gadipake karena katanya mau statis
-
-		// ClimateConditionID: input.ClimateConditionID,
 	}
 
 	for i, instruction := range input.PlantInstructions {
@@ -146,13 +132,6 @@ func (s *plantService) UpdatePlant(id int, input UpdatePlantInput) (PlantRespons
 		return PlantResponse{}, err
 	}
 
-	// Sementara gadipake karena katanya mau statis
-
-	// condition, err := s.climateConditionRepository.FindByID(input.ClimateConditionID)
-	// if err != nil {
-	// 	return PlantResponse{}, err
-	// }
-
 	plant.Name = input.Name
 	plant.Description = input.Description
 	plant.IsToxic = input.IsToxic
@@ -181,11 +160,6 @@ func (s *plantService) UpdatePlant(id int, input UpdatePlantInput) (PlantRespons
 		WeatherCondition:     input.WateringSchedule.WeatherCondition,
 		ConditionDescription: input.WateringSchedule.ConditionDescription,
 	}
-
-	// Sementara gadipake karena katanya mau statis
-
-	// plant.ClimateConditionID = input.ClimateConditionID
-	
 
 	for i, instruction := range input.PlantInstructions {
 		plant.PlantInstructions[i] = PlantInstruction{

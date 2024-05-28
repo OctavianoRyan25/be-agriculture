@@ -23,12 +23,6 @@ type Plant struct {
   PlantImages       	 []PlantImage       `json:"plant_images" gorm:"foreignKey:PlantID;constraint:OnDelete:CASCADE"`
 	CreatedAt         	 time.Time          `json:"created_at"`
 	UpdatedAt         	 time.Time          `json:"updated_at"`
-
-
-	// Sementara gadipake karena katanya mau statis
-
-	// ClimateConditionID  int              	`json:"climate_condition_id"`
-	// ClimateCondition  	 ClimateCondition   `json:"climate_condition"`
 }
 
 type PlantCharateristic struct {
@@ -95,13 +89,3 @@ type PlantCategory struct {
 	CreatedAt         	 time.Time          `json:"created_at"`
 	UpdatedAt         	 time.Time          `json:"updated_at"`
 }
-
-// Sementara gadipake karena katanya mau statis
-
-// type ClimateCondition struct {
-// 	ID   							 int    						`json:"id" gorm:"primaryKey"`
-// 	Name 							 string 						`json:"name"`
-// 	ImageURL 					 string 						`json:"image_url"`
-// 	CreatedAt          time.Time          `json:"created_at"`
-// 	UpdatedAt          time.Time          `json:"updated_at"`
-// }
