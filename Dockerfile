@@ -15,6 +15,7 @@ FROM alpine:3.19 AS build-release-stage
 WORKDIR /
 
 COPY --from=build-stage /goapp /goapp
+COPY --from=build-stage /app/modules/user/template/ /app/modules/user/template/
 
 EXPOSE 8080
 
