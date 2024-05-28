@@ -21,14 +21,14 @@ func NewPlantRepository(db *gorm.DB) PlantRepository {
 
 func (r *plantRepository) FindAll() ([]Plant, error) {
 	var plants []Plant
-	err := r.db.Preload("PlantCategory").Preload("PlantCharateristic").Preload("WateringSchedule").
+	err := r.db.Preload("PlantCategory").Preload("PlantCharacteristic").Preload("WateringSchedule").
 		Preload("PlantInstructions").Preload("PlantFAQs").Preload("PlantImages").Find(&plants).Error
 	return plants, err
 }
 
 func (r *plantRepository) FindByID(id int) (Plant, error) {
 	var plant Plant
-	err := r.db.Preload("PlantCategory").Preload("PlantCharateristic").Preload("WateringSchedule").
+	err := r.db.Preload("PlantCategory").Preload("PlantCharacteristic").Preload("WateringSchedule").
 		Preload("PlantInstructions").Preload("PlantFAQs").Preload("PlantImages").First(&plant, id).Error
 	return plant, err
 }
@@ -47,7 +47,7 @@ func (r *plantRepository) Update(plant Plant) (Plant, error) {
 func (r *plantRepository) FindByIDWithRelations(id int) (Plant, error) {
 	var plant Plant
 	err := r.db.Preload("PlantCategory").
-			Preload("PlantCharateristic").
+			Preload("PlantCharacteristic").
 			Preload("WateringSchedule").
 			Preload("PlantInstructions").
 			Preload("PlantFAQs").

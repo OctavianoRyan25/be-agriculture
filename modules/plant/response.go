@@ -12,7 +12,7 @@ type PlantResponse struct {
 	ClimateCondition 			string											  `json:"climate_condition"`
 	PlantingTime     			string                        `json:"planting_time"`
 	Sunlight         			string                        `json:"sunlight"`
-	PlantCharateristic 		PlantCharateristicResponse 		`json:"plant_charateristic"`
+	PlantCharacteristic 		PlantCharacteristicResponse 		`json:"plant_characteristic"`
 	WateringSchedule 			PlantReminderResponse      		`json:"watering_schedule"`
 	PlantInstruction 			[]PlantInstructionResponse 		`json:"plant_instructions"`
 	PlantFAQ         			[]PlantFAQResponse         		`json:"plant_faqs"`
@@ -26,7 +26,7 @@ type PlantCategoryClimateResponse struct {
 	ImageURL 							string 				`json:"image_url"`
 }
 
-type PlantCharateristicResponse struct {
+type PlantCharacteristicResponse struct {
 	ID         						int    				`json:"id"`
 	Height     						int    				`json:"height"`
 	HeightUnit 						string 				`json:"height_unit"`
@@ -83,7 +83,7 @@ func NewPlantResponse(plant Plant) PlantResponse {
 		PlantingTime			 : plant.PlantingTime,
 		Sunlight					 : plant.Sunlight,
 		PlantCategory			 : NewPlantCategoryResponse(plant.PlantCategory),
-		PlantCharateristic : NewPlantCharacteristicResponse(plant.PlantCharateristic),
+		PlantCharacteristic : NewPlantCharacteristicResponse(plant.PlantCharacteristic),
 		WateringSchedule	 : NewPlantReminderResponse(plant.WateringSchedule),
 		PlantInstruction	 : NewPlantInstructionResponses(plant.PlantInstructions),
 		PlantFAQ					 : NewPlantFAQResponses(plant.PlantFAQs),
@@ -100,8 +100,8 @@ func NewPlantCategoryResponse(category PlantCategory) PlantCategoryClimateRespon
 	}
 }
 
-func NewPlantCharacteristicResponse(characteristic PlantCharateristic) PlantCharateristicResponse {
-	return PlantCharateristicResponse{
+func NewPlantCharacteristicResponse(characteristic PlantCharacteristic) PlantCharacteristicResponse {
+	return PlantCharacteristicResponse{
 		ID				 : characteristic.ID,
 		Height		 : characteristic.Height,
 		HeightUnit : characteristic.HeightUnit,
@@ -159,6 +159,7 @@ func NewPlantInstructionResponse(instruction PlantInstruction) PlantInstructionR
 		ID							: instruction.ID,
 		PlantID					: instruction.PlantID,
 		StepNumber			: instruction.StepNumber,
+		StepTitle				: instruction.StepTitle,
 		StepDescription	: instruction.StepDescription,
 		StepImageURL		: instruction.StepImageURL,
 		AdditionalTips	: instruction.AdditionalTips,

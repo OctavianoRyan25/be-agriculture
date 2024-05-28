@@ -68,12 +68,12 @@ func (h *PlantHandler) Create(c echo.Context) error {
 	input.ClimateCondition = form.Value["climate_condition"][0]
 
 	// Parsing plant characteristic
-	input.PlantCharateristic = plant.CreatePlantCharateristicInput{
-		Height: atoi(form.Value["plant_charateristic.height"][0]),
-		HeightUnit: form.Value["plant_charateristic.height_unit"][0],
-		Wide: atoi(form.Value["plant_charateristic.wide"][0]),
-		WideUnit: form.Value["plant_charateristic.wide_unit"][0],
-		LeafColor: form.Value["plant_charateristic.leaf_color"][0],
+	input.PlantCharacteristic = plant.CreatePlantCharacteristicInput{
+		Height: atoi(form.Value["plant_characteristic.height"][0]),
+		HeightUnit: form.Value["plant_characteristic.height_unit"][0],
+		Wide: atoi(form.Value["plant_characteristic.wide"][0]),
+		WideUnit: form.Value["plant_characteristic.wide_unit"][0],
+		LeafColor: form.Value["plant_characteristic.leaf_color"][0],
 	}
 
 	// Parsing watering schedule
@@ -196,12 +196,12 @@ func (h *PlantHandler) Update(c echo.Context) error {
 	input.ClimateCondition = form.Value["climate_condition"][0]
 
 	// Parsing plant characteristic
-	input.PlantCharateristic = plant.CreatePlantCharateristicInput{
-		Height: atoi(form.Value["plant_charateristic.height"][0]),
-		HeightUnit: form.Value["plant_charateristic.height_unit"][0],
-		Wide: atoi(form.Value["plant_charateristic.wide"][0]),
-		WideUnit: form.Value["plant_charateristic.wide_unit"][0],
-		LeafColor: form.Value["plant_charateristic.leaf_color"][0],
+	input.PlantCharacteristic = plant.CreatePlantCharacteristicInput{
+		Height: atoi(form.Value["plant_characteristic.height"][0]),
+		HeightUnit: form.Value["plant_characteristic.height_unit"][0],
+		Wide: atoi(form.Value["plant_characteristic.wide"][0]),
+		WideUnit: form.Value["plant_characteristic.wide_unit"][0],
+		LeafColor: form.Value["plant_characteristic.leaf_color"][0],
 	}
 
 	// Parsing watering schedule

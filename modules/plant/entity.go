@@ -15,8 +15,8 @@ type Plant struct {
 	PlantCategoryID   	 int                `json:"plant_category_id"`
 	PlantCategory     	 PlantCategory      `json:"plant_category"`
 	ClimateCondition		 string             `json:"climate_condition"`
-	PlantCharateristicID int                `json:"plant_charateristic_id"`
-	PlantCharateristic   PlantCharateristic `json:"plant_charateristic"`
+	PlantCharacteristicID int                `json:"plant_characteristic_id"`
+	PlantCharacteristic   PlantCharacteristic `json:"plant_characteristic" gorm:"foreignKey:PlantID;constraint:OnDelete:CASCADE"`
 	WateringSchedule  	 PlantReminder  		`json:"watering_schedule" gorm:"foreignKey:PlantID;constraint:OnDelete:CASCADE"`
   PlantInstructions 	 []PlantInstruction `json:"plant_instructions" gorm:"foreignKey:PlantID;constraint:OnDelete:CASCADE"`
   PlantFAQs         	 []PlantFAQ         `json:"plant_faqs" gorm:"foreignKey:PlantID;constraint:OnDelete:CASCADE"`
@@ -25,7 +25,7 @@ type Plant struct {
 	UpdatedAt         	 time.Time          `json:"updated_at"`
 }
 
-type PlantCharateristic struct {
+type PlantCharacteristic struct {
 	ID         					 int    						`json:"id" gorm:"primaryKey"`
 	PlantID    					 int    						`json:"plant_id"`
 	Height     					 int    						`json:"height"`
@@ -60,7 +60,6 @@ type PlantInstruction struct {
 	AdditionalTips  		 string 						`json:"additional_tips"`
 	CreatedAt         	 time.Time          `json:"created_at"`
 	UpdatedAt         	 time.Time          `json:"updated_at"`
-
 }
 
 type PlantFAQ struct {

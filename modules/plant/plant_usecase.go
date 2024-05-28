@@ -65,12 +65,12 @@ func (s *plantService) CreatePlant(input CreatePlantInput) (PlantResponse, error
 		PlantInstructions:  make([]PlantInstruction, len(input.PlantInstructions)),
 		PlantFAQs:          make([]PlantFAQ, len(input.PlantFAQs)),
 		PlantImages:        make([]PlantImage, len(input.PlantImages)),
-		PlantCharateristic: PlantCharateristic{
-			Height:     input.PlantCharateristic.Height,
-			HeightUnit: input.PlantCharateristic.HeightUnit,
-			Wide:       input.PlantCharateristic.Wide,
-			WideUnit:   input.PlantCharateristic.WideUnit,
-			LeafColor:  input.PlantCharateristic.LeafColor,
+		PlantCharacteristic: PlantCharacteristic{
+			Height:     input.PlantCharacteristic.Height,
+			HeightUnit: input.PlantCharacteristic.HeightUnit,
+			Wide:       input.PlantCharacteristic.Wide,
+			WideUnit:   input.PlantCharacteristic.WideUnit,
+			LeafColor:  input.PlantCharacteristic.LeafColor,
 		},
 		WateringSchedule: PlantReminder{
 			WateringFrequency:   input.WateringSchedule.WateringFrequency,
@@ -143,12 +143,12 @@ func (s *plantService) UpdatePlant(id int, input UpdatePlantInput) (PlantRespons
 	plant.ClimateCondition = input.ClimateCondition
 	plant.UpdatedAt = time.Now()
 	
-	plant.PlantCharateristic = PlantCharateristic{
-		Height:     input.PlantCharateristic.Height,
-		HeightUnit: input.PlantCharateristic.HeightUnit,
-		Wide:       input.PlantCharateristic.Wide,
-		WideUnit:   input.PlantCharateristic.WideUnit,
-		LeafColor:  input.PlantCharateristic.LeafColor,
+	plant.PlantCharacteristic = PlantCharacteristic{
+		Height:     input.PlantCharacteristic.Height,
+		HeightUnit: input.PlantCharacteristic.HeightUnit,
+		Wide:       input.PlantCharacteristic.Wide,
+		WideUnit:   input.PlantCharacteristic.WideUnit,
+		LeafColor:  input.PlantCharacteristic.LeafColor,
 	}
 	
 	plant.WateringSchedule = PlantReminder{
