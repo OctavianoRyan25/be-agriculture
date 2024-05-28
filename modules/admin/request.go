@@ -1,14 +1,13 @@
-package user
+package admin
 
 import (
 	"time"
 )
 
-type UserRequest struct {
+type AdminRequest struct {
 	Name       string    `json:"name" validate:"required"`
 	Email      string    `json:"email" validate:"required,email"`
 	Password   string    `json:"password" validate:"required"`
-	Is_Active  bool      `json:"is_active"`
 	Url_Image  string    `json:"url_image"`
 	Created_at time.Time `json:"created_at"`
 	Updated_at time.Time `json:"updated_at"`

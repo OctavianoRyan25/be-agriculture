@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/OctavianoRyan25/be-agriculture/configs"
-	"github.com/labstack/echo"
+	"github.com/OctavianoRyan25/be-agriculture/modules/admin"
+	"github.com/OctavianoRyan25/be-agriculture/modules/user"
+	"github.com/OctavianoRyan25/be-agriculture/router"
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
@@ -24,9 +26,15 @@ func main() {
 		panic("Failed to migrate database")
 	}
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+	repo := user.NewRepository(db)
+	useCase := user.NewUseCase(repo)
+	controller := user.NewUserController(useCase)
+
+	repoAdmin := admin.NewRepository(db)
+	useCaseAdmin := admin.NewUseCase(repoAdmin)
+	controllerAdmin := admin.NewUserController(*useCaseAdmin)
+
+	router.InitRoutes(e, controller, controllerAdmin)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

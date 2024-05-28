@@ -1,16 +1,14 @@
-package user
+package admin
 
 import (
 	"time"
 )
 
-type User struct {
+type Admin struct {
 	ID         int `gorm:"primaryKey"`
 	Name       string
 	Email      string
 	Password   string
-	Is_Active  bool
-	OTP        string
 	Url_Image  string
 	Created_at time.Time
 	Updated_at time.Time
