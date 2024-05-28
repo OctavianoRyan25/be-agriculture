@@ -3,8 +3,8 @@ package plant
 type PlantCategoryService interface {
 	FindAll() ([]PlantCategoryClimateResponse, error)
 	FindByID(id int) (PlantCategoryClimateResponse, error)
-	Create(input PlantCategoryClimateInput) (PlantCategoryClimateResponse, error)
-	Update(id int, input PlantCategoryClimateInput) (PlantCategoryClimateResponse, error)
+	Create(input PlantCategoryClimateInput, fileLocation string) (PlantCategoryClimateResponse, error)
+	Update(id int, input PlantCategoryClimateInput, imageURL string) (PlantCategoryClimateResponse, error)
 	Delete(id int) error
 }
 
@@ -39,10 +39,10 @@ func (s *plantCategoryService) FindByID(id int) (PlantCategoryClimateResponse, e
 	return NewPlantCategoryResponse(category), nil
 }
 
-func (s *plantCategoryService) Create(input PlantCategoryClimateInput) (PlantCategoryClimateResponse, error) {
+func (s *plantCategoryService) Create(input PlantCategoryClimateInput, imageURL string) (PlantCategoryClimateResponse, error) {
 	category := PlantCategory{
 		Name:     input.Name,
-		ImageURL: input.ImageURL,
+		ImageURL: imageURL,
 	}
 
 	newCategory, err := s.repository.Create(category)
@@ -53,14 +53,16 @@ func (s *plantCategoryService) Create(input PlantCategoryClimateInput) (PlantCat
 	return NewPlantCategoryResponse(newCategory), nil
 }
 
-func (s *plantCategoryService) Update(id int, input PlantCategoryClimateInput) (PlantCategoryClimateResponse, error) {
+func (s *plantCategoryService) Update(id int, input PlantCategoryClimateInput, imageURL string) (PlantCategoryClimateResponse, error) {
 	category, err := s.repository.FindByID(id)
 	if err != nil {
 		return PlantCategoryClimateResponse{}, err
 	}
 
 	category.Name = input.Name
-	category.ImageURL = input.ImageURL
+	if imageURL != "" {
+		category.ImageURL = imageURL
+	}
 
 	updatedCategory, err := s.repository.Update(category)
 	if err != nil {

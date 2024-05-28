@@ -15,12 +15,24 @@ type PlantResponse struct {
 	IsToxic          bool                       `json:"is_toxic"`
 	HarvestDuration  int                        `json:"harvest_duration"`
 	PlantCategory    PlantCategoryClimateResponse `json:"plant_category"`
-	ClimateCondition PlantCategoryClimateResponse `json:"climate_condition"`
+	ClimateCondition string											 `json:"climate_condition"`
+	PlantingTime     string                        `json:"planting_time"`
+	Sunlight         string                        `json:"sunlight"`
+	PlantCharateristic PlantCharateristicResponse `json:"plant_charateristic"`
 	WateringSchedule PlantReminderResponse      `json:"watering_schedule"`
 	PlantInstruction []PlantInstructionResponse `json:"plant_instructions"`
 	PlantFAQ         []PlantFAQResponse         `json:"plant_faqs"`
 	PlantImages      []PlantImageResponse       `json:"plant_images"`
 	CreatedAt        time.Time                  `json:"created_at"`
+}
+
+type PlantCharateristicResponse struct {
+	ID         int    `json:"id"`
+	Height     int    `json:"height"`
+	HeightUnit string `json:"height_unit"`
+	Wide       int    `json:"wide"`
+	WideUnit   string `json:"wide_unit"`
+	LeafColor  string `json:"leaf_color"`
 }
 
 type PlantImageResponse struct {
@@ -67,13 +79,19 @@ func NewPlantResponse(plant Plant) PlantResponse {
 		Description:      plant.Description,
 		IsToxic:          plant.IsToxic,
 		HarvestDuration:  plant.HarvestDuration,
+		ClimateCondition: plant.ClimateCondition,
+		PlantingTime:     plant.PlantingTime,
+		Sunlight:         plant.Sunlight,
 		PlantCategory:    NewPlantCategoryResponse(plant.PlantCategory),
-		ClimateCondition: NewClimateConditionResponse(plant.ClimateCondition),
+		PlantCharateristic: NewPlantCharacteristicResponse(plant.PlantCharateristic),
 		WateringSchedule: NewPlantReminderResponse(plant.WateringSchedule),
 		PlantInstruction: NewPlantInstructionResponses(plant.PlantInstructions),
 		PlantFAQ:         NewPlantFAQResponses(plant.PlantFAQs),
 		PlantImages:      NewPlantImageResponses(plant.PlantImages),
 		CreatedAt:        plant.CreatedAt,
+
+		// Sementara gadipake karena katanya mau statis
+		// ClimateCondition: NewClimateConditionResponse(plant.ClimateCondition),
 	}
 }
 
@@ -85,11 +103,14 @@ func NewPlantCategoryResponse(category PlantCategory) PlantCategoryClimateRespon
 	}
 }
 
-func NewClimateConditionResponse(condition ClimateCondition) PlantCategoryClimateResponse {
-	return PlantCategoryClimateResponse{
-		ID:   condition.ID,
-		Name: condition.Name,
-		ImageURL: condition.ImageURL,
+func NewPlantCharacteristicResponse(characteristic PlantCharateristic) PlantCharateristicResponse {
+	return PlantCharateristicResponse{
+		ID:         characteristic.ID,
+		Height:     characteristic.Height,
+		HeightUnit: characteristic.HeightUnit,
+		Wide:       characteristic.Wide,
+		WideUnit:   characteristic.WideUnit,
+		LeafColor:  characteristic.LeafColor,
 	}
 }
 
@@ -160,3 +181,13 @@ func NewPlantFAQResponse(faq PlantFAQ) PlantFAQResponse {
 		CreatedAt: faq.CreatedAt,
 	}
 }
+
+// Sementara gadipake karena katanya mau statis
+
+// func NewClimateConditionResponse(condition ClimateCondition) PlantCategoryClimateResponse {
+// 	return PlantCategoryClimateResponse{
+// 		ID:   condition.ID,
+// 		Name: condition.Name,
+// 		ImageURL: condition.ImageURL,
+// 	}
+// }

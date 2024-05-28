@@ -1,22 +1,26 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/OctavianoRyan25/be-agriculture/modules/plant"
 	"github.com/OctavianoRyan25/be-agriculture/utils/helper"
+	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
 
 type PlantHandler struct {
 	service plant.PlantService
+	cloudinary  *cloudinary.Cloudinary
 }
 
-func NewPlantHandler(service plant.PlantService) *PlantHandler {
-	return &PlantHandler{service}
+func NewPlantHandler(service plant.PlantService, 	cloudinary  *cloudinary.Cloudinary) *PlantHandler {
+	return &PlantHandler{service, cloudinary}
 }
 
 func (h *PlantHandler) GetAll(c echo.Context) error {
@@ -46,20 +50,113 @@ func (h *PlantHandler) GetByID(c echo.Context) error {
 }
 
 func (h *PlantHandler) Create(c echo.Context) error {
-	var request plant.CreatePlantInput
-	if err := c.Bind(&request); err != nil {
-		response := helper.APIResponse("Invalid request", http.StatusBadRequest, "error", nil)
+	form, err := c.MultipartForm()
+	if err != nil {
+		response := helper.APIResponse("Invalid multipart form data", http.StatusBadRequest, "error", nil)
 		return c.JSON(http.StatusBadRequest, response)
 	}
 
+	var input plant.CreatePlantInput
+
+	input.Name = form.Value["name"][0]
+	input.Description = form.Value["description"][0]
+	input.IsToxic = form.Value["is_toxic"][0] == "true"
+	input.HarvestDuration, _ = strconv.Atoi(form.Value["harvest_duration"][0])
+	input.Sunlight = form.Value["sunlight"][0]
+	input.PlantingTime = form.Value["planting_time"][0]
+	input.PlantCategoryID, _ = strconv.Atoi(form.Value["plant_category_id"][0])
+	input.ClimateCondition = form.Value["climate_condition"][0]
+
+	// Parsing plant characteristic
+	input.PlantCharateristic = plant.CreatePlantCharateristicInput{
+		Height: atoi(form.Value["plant_charateristic.height"][0]),
+		HeightUnit: form.Value["plant_charateristic.height_unit"][0],
+		Wide: atoi(form.Value["plant_charateristic.wide"][0]),
+		WideUnit: form.Value["plant_charateristic.wide_unit"][0],
+		LeafColor: form.Value["plant_charateristic.leaf_color"][0],
+	}
+
+	// Parsing watering schedule
+	input.WateringSchedule = plant.CreateWateringScheduleInput{
+		WateringFrequency:    atoi(form.Value["watering_schedule.watering_frequency"][0]),
+		Each:                 form.Value["watering_schedule.each"][0],
+		WateringAmount:       atoi(form.Value["watering_schedule.watering_amount"][0]),
+		Unit:                 form.Value["watering_schedule.unit"][0],
+		WateringTime:         form.Value["watering_schedule.watering_time"][0],
+		WeatherCondition:     form.Value["watering_schedule.weather_condition"][0],
+		ConditionDescription: form.Value["watering_schedule.condition_description"][0],
+	}
+
+	// Parsing plant instructions with image upload
+	instructionFiles := form.File["plant_instructions.step_image_url"]
+	for i := 0; i < len(form.Value["plant_instructions.step_number"]); i++ {
+		instruction := plant.CreatePlantInstructionInput{
+			StepNumber:      atoi(form.Value["plant_instructions.step_number"][i]),
+			StepTitle:       form.Value["plant_instructions.step_title"][i],
+			StepDescription: form.Value["plant_instructions.step_description"][i],
+			StepImageURL:    "",
+			AdditionalTips:  form.Value["plant_instructions.additional_tips"][i],
+		}
+
+		// Handle file upload for step_image_url
+		if i < len(instructionFiles) {
+			file := instructionFiles[i]
+			src, err := file.Open()
+			if err != nil {
+				return err
+			}
+			defer src.Close()
+
+			uploadResult, err := h.cloudinary.Upload.Upload(context.Background(), src, uploader.UploadParams{Folder: "be-agriculture"})
+			if err != nil {
+				return err
+			}
+
+			instruction.StepImageURL = uploadResult.SecureURL
+		}
+
+		input.PlantInstructions = append(input.PlantInstructions, instruction)
+	}
+
+	// Parsing plant FAQs
+	for i := 0; i < len(form.Value["plant_faqs.question"]); i++ {
+		faq := plant.CreatePlantFAQInput{
+			Question: form.Value["plant_faqs.question"][i],
+			Answer:   form.Value["plant_faqs.answer"][i],
+		}
+		input.PlantFAQs = append(input.PlantFAQs, faq)
+	}
+
+	// Parsing plant images
+	files := form.File["plant_images"]
+	for i, file := range files {
+		src, err := file.Open()
+		if err != nil {
+			return err
+		}
+		defer src.Close()
+
+		uploadResult, err := h.cloudinary.Upload.Upload(context.Background(), src, uploader.UploadParams{Folder: "be-agriculture"})
+		if err != nil {
+			return err
+		}
+
+		plantImage := plant.CreatePlantImageInput{
+			FileName:  uploadResult.SecureURL,
+			IsPrimary: atoi(form.Value["plant_images.is_primary"][i]),
+		}
+		input.PlantImages = append(input.PlantImages, plantImage)
+	}
+
+	// Perform validation
 	validate := validator.New()
-	if err := validate.Struct(&request); err != nil {
+	if err := validate.Struct(&input); err != nil {
 		errors := helper.FormatValidationError(err)
 		response := helper.APIResponse(strings.Join(errors, ", "), http.StatusBadRequest, "error", nil)
 		return c.JSON(http.StatusBadRequest, response)
 	}
 
-	createdPlant, err := h.service.CreatePlant(request)
+	createdPlant, err := h.service.CreatePlant(input)
 	if err != nil {
 		response := helper.APIResponse("Failed to create plant", http.StatusInternalServerError, "error", nil)
 		return c.JSON(http.StatusInternalServerError, response)
@@ -69,30 +166,129 @@ func (h *PlantHandler) Create(c echo.Context) error {
 	return c.JSON(http.StatusCreated, response)
 }
 
+func atoi(str string) int {
+	i, _ := strconv.Atoi(str)
+	return i
+}
+
 func (h *PlantHandler) Update(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-			response := helper.APIResponse("Invalid ID", http.StatusBadRequest, "error", nil)
-			return c.JSON(http.StatusBadRequest, response)
+		response := helper.APIResponse("Invalid plant ID", http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
 	}
 
-	var input plant.CreatePlantInput
-	if err := c.Bind(&input); err != nil {
-			response := helper.APIResponse("Failed to bind input", http.StatusBadRequest, "error", nil)
-			return c.JSON(http.StatusBadRequest, response)
+	form, err := c.MultipartForm()
+	if err != nil {
+		response := helper.APIResponse("Invalid multipart form data", http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
 	}
 
+	var input plant.UpdatePlantInput
+
+	input.Name = form.Value["name"][0]
+	input.Description = form.Value["description"][0]
+	input.IsToxic = form.Value["is_toxic"][0] == "true"
+	input.HarvestDuration, _ = strconv.Atoi(form.Value["harvest_duration"][0])
+	input.Sunlight = form.Value["sunlight"][0]
+	input.PlantingTime = form.Value["planting_time"][0]
+	input.PlantCategoryID, _ = strconv.Atoi(form.Value["plant_category_id"][0])
+	input.ClimateCondition = form.Value["climate_condition"][0]
+
+	// Parsing plant characteristic
+	input.PlantCharateristic = plant.CreatePlantCharateristicInput{
+		Height: atoi(form.Value["plant_charateristic.height"][0]),
+		HeightUnit: form.Value["plant_charateristic.height_unit"][0],
+		Wide: atoi(form.Value["plant_charateristic.wide"][0]),
+		WideUnit: form.Value["plant_charateristic.wide_unit"][0],
+		LeafColor: form.Value["plant_charateristic.leaf_color"][0],
+	}
+
+	// Parsing watering schedule
+	input.WateringSchedule = plant.CreateWateringScheduleInput{
+		WateringFrequency:    atoi(form.Value["watering_schedule.watering_frequency"][0]),
+		Each:                 form.Value["watering_schedule.each"][0],
+		WateringAmount:       atoi(form.Value["watering_schedule.watering_amount"][0]),
+		Unit:                 form.Value["watering_schedule.unit"][0],
+		WateringTime:         form.Value["watering_schedule.watering_time"][0],
+		WeatherCondition:     form.Value["watering_schedule.weather_condition"][0],
+		ConditionDescription: form.Value["watering_schedule.condition_description"][0],
+	}
+
+	// Parsing plant instructions with image upload
+	instructionFiles := form.File["plant_instructions.step_image_url"]
+	for i := 0; i < len(form.Value["plant_instructions.step_number"]); i++ {
+		instruction := plant.CreatePlantInstructionInput{
+			StepNumber:      atoi(form.Value["plant_instructions.step_number"][i]),
+			StepTitle:       form.Value["plant_instructions.step_title"][i],
+			StepDescription: form.Value["plant_instructions.step_description"][i],
+			StepImageURL:    "",
+			AdditionalTips:  form.Value["plant_instructions.additional_tips"][i],
+		}
+
+		// Handle file upload for step_image_url
+		if i < len(instructionFiles) {
+			file := instructionFiles[i]
+			src, err := file.Open()
+			if err != nil {
+				return err
+			}
+			defer src.Close()
+
+			uploadResult, err := h.cloudinary.Upload.Upload(context.Background(), src, uploader.UploadParams{Folder: "be-agriculture"})
+			if err != nil {
+				return err
+			}
+
+			instruction.StepImageURL = uploadResult.SecureURL
+		}
+
+		input.PlantInstructions = append(input.PlantInstructions, instruction)
+	}
+
+	// Parsing plant FAQs
+	for i := 0; i < len(form.Value["plant_faqs.question"]); i++ {
+		faq := plant.CreatePlantFAQInput{
+			Question: form.Value["plant_faqs.question"][i],
+			Answer:   form.Value["plant_faqs.answer"][i],
+		}
+		input.PlantFAQs = append(input.PlantFAQs, faq)
+	}
+
+	// Parsing plant images
+	files := form.File["plant_images"]
+	for i, file := range files {
+		src, err := file.Open()
+		if err != nil {
+			return err
+		}
+		defer src.Close()
+
+		uploadResult, err := h.cloudinary.Upload.Upload(context.Background(), src, uploader.UploadParams{Folder: "be-agriculture"})
+		if err != nil {
+			return err
+		}
+
+		plantImage := plant.CreatePlantImageInput{
+			FileName:  uploadResult.SecureURL,
+			IsPrimary: atoi(form.Value["plant_images.is_primary"][i]),
+		}
+		
+		input.PlantImages = append(input.PlantImages, plantImage)
+	}
+
+	// Perform validation
 	validate := validator.New()
 	if err := validate.Struct(&input); err != nil {
-			errors := helper.FormatValidationError(err)
-			response := helper.APIResponse("Validation error", http.StatusBadRequest, "error", errors)
-			return c.JSON(http.StatusBadRequest, response)
+		errors := helper.FormatValidationError(err)
+		response := helper.APIResponse(strings.Join(errors, ", "), http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
 	}
 
 	updatedPlant, err := h.service.UpdatePlant(id, input)
 	if err != nil {
-			response := helper.APIResponse("Failed to update plant", http.StatusInternalServerError, "error", nil)
-			return c.JSON(http.StatusInternalServerError, response)
+		response := helper.APIResponse("Failed to update plant", http.StatusInternalServerError, "error", nil)
+		return c.JSON(http.StatusInternalServerError, response)
 	}
 
 	response := helper.APIResponse("Plant updated successfully", http.StatusOK, "success", updatedPlant)
@@ -115,3 +311,5 @@ func (h *PlantHandler) Delete(c echo.Context) error {
 	response := helper.APIResponse("Plant deleted successfully", http.StatusOK, "success", deletedPlant)
 	return c.JSON(http.StatusOK, response)
 }
+
+

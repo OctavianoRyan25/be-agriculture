@@ -7,7 +7,8 @@ type PlantRepository interface {
 	FindByID(id int) (Plant, error)
 	Create(plant Plant) (Plant, error)
 	Update(plant Plant) (Plant, error)
-	Delete(id int) (Plant, error)
+	Delete(id int) error
+	FindByIDWithRelations(id int) (Plant, error)
 }
 
 type plantRepository struct {
@@ -20,14 +21,14 @@ func NewPlantRepository(db *gorm.DB) PlantRepository {
 
 func (r *plantRepository) FindAll() ([]Plant, error) {
 	var plants []Plant
-	err := r.db.Preload("PlantCategory").Preload("ClimateCondition").Preload("WateringSchedule").
+	err := r.db.Preload("PlantCategory").Preload("PlantCharateristic").Preload("WateringSchedule").
 		Preload("PlantInstructions").Preload("PlantFAQs").Preload("PlantImages").Find(&plants).Error
 	return plants, err
 }
 
 func (r *plantRepository) FindByID(id int) (Plant, error) {
 	var plant Plant
-	err := r.db.Preload("PlantCategory").Preload("ClimateCondition").Preload("WateringSchedule").
+	err := r.db.Preload("PlantCategory").Preload("PlantCharateristic").Preload("WateringSchedule").
 		Preload("PlantInstructions").Preload("PlantFAQs").Preload("PlantImages").First(&plant, id).Error
 	return plant, err
 }
@@ -43,12 +44,26 @@ func (r *plantRepository) Update(plant Plant) (Plant, error) {
 	return plant, err
 }
 
-func (r *plantRepository) Delete(id int) (Plant, error) {
+func (r *plantRepository) FindByIDWithRelations(id int) (Plant, error) {
 	var plant Plant
-	err := r.db.First(&plant, id).Error
+	err := r.db.Preload("PlantCategory").
+			Preload("PlantCharateristic").
+			Preload("WateringSchedule").
+			Preload("PlantInstructions").
+			Preload("PlantFAQs").
+			Preload("PlantImages").
+			Where("id = ?", id).
+			First(&plant).Error
 	if err != nil {
-		return plant, err
+			return Plant{}, err
 	}
-	err = r.db.Delete(&plant).Error
-	return plant, err
+	return plant, nil
 }
+
+func (r *plantRepository) Delete(id int) error {
+	if err := r.db.Delete(&Plant{}, id).Error; err != nil {
+			return err
+	}
+	return nil
+}
+

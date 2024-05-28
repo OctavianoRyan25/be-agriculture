@@ -1,21 +1,25 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
 	"github.com/OctavianoRyan25/be-agriculture/modules/plant"
 	"github.com/OctavianoRyan25/be-agriculture/utils/helper"
+	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
 
 type ClimateConditionHandler struct {
 	service plant.ClimateConditionService
+	cloudinary  *cloudinary.Cloudinary
 }
 
-func NewClimateConditionHandler(service plant.ClimateConditionService) *ClimateConditionHandler {
-	return &ClimateConditionHandler{service}
+func NewClimateConditionHandler(service plant.ClimateConditionService, cloudinary  *cloudinary.Cloudinary) *ClimateConditionHandler {
+	return &ClimateConditionHandler{service, cloudinary}
 }
 
 func (h *ClimateConditionHandler) GetAll(c echo.Context) error {
@@ -63,7 +67,32 @@ func (h *ClimateConditionHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response)
 	}
 
-	climateCondition, err := h.service.Create(input)
+	file, err := c.FormFile("image_url")
+	if err != nil {
+		response := helper.APIResponse("Failed to get uploaded image", http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	fileReader, err := file.Open()
+	if err != nil {
+		response := helper.APIResponse("Failed to open uploaded file", http.StatusInternalServerError, "error", nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+	defer fileReader.Close()
+
+	params := uploader.UploadParams{
+		Folder: "be-agriculture",
+	}
+
+	uploadResult, err := h.cloudinary.Upload.Upload(context.Background(), fileReader, params)
+	if err != nil {
+		response := helper.APIResponse("Failed to upload image to Cloudinary", http.StatusInternalServerError, "error", nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	imageURL := uploadResult.SecureURL
+
+	climateCondition, err := h.service.Create(input, imageURL)
 	if err != nil {
 		response := helper.APIResponse("Failed to create climate condition", http.StatusInternalServerError, "error", nil)
 		return c.JSON(http.StatusInternalServerError, response)
@@ -72,6 +101,7 @@ func (h *ClimateConditionHandler) Create(c echo.Context) error {
 	response := helper.APIResponse("Climate condition created successfully", http.StatusCreated, "success", climateCondition)
 	return c.JSON(http.StatusCreated, response)
 }
+
 
 func (h *ClimateConditionHandler) Update(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
@@ -94,7 +124,36 @@ func (h *ClimateConditionHandler) Update(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response)
 	}
 
-	climateCondition, err := h.service.Update(id, input)
+	// Handle file upload if a new file is provided
+	file, err := c.FormFile("image_url")
+	if err != nil && err != http.ErrMissingFile {
+		response := helper.APIResponse("Failed to get uploaded image", http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	var imageURL string
+	if file != nil {
+		fileReader, err := file.Open()
+		if err != nil {
+			response := helper.APIResponse("Failed to open uploaded file", http.StatusInternalServerError, "error", nil)
+			return c.JSON(http.StatusInternalServerError, response)
+		}
+		defer fileReader.Close()
+
+		params := uploader.UploadParams{
+			Folder: "be-agriculture",
+		}
+
+		uploadResult, err := h.cloudinary.Upload.Upload(context.Background(), fileReader, params)
+		if err != nil {
+			response := helper.APIResponse("Failed to upload image to Cloudinary", http.StatusInternalServerError, "error", nil)
+			return c.JSON(http.StatusInternalServerError, response)
+		}
+
+		imageURL = uploadResult.SecureURL
+	}
+
+	climateCondition, err := h.service.Update(id, input, imageURL)
 	if err != nil {
 		response := helper.APIResponse("Failed to update climate condition", http.StatusInternalServerError, "error", nil)
 		return c.JSON(http.StatusInternalServerError, response)
@@ -103,6 +162,7 @@ func (h *ClimateConditionHandler) Update(c echo.Context) error {
 	response := helper.APIResponse("Climate condition updated successfully", http.StatusOK, "success", climateCondition)
 	return c.JSON(http.StatusOK, response)
 }
+
 
 func (h *ClimateConditionHandler) Delete(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))

@@ -3,8 +3,8 @@ package plant
 type ClimateConditionService interface {
 	FindAll() ([]PlantCategoryClimateResponse, error)
 	FindByID(id int) (PlantCategoryClimateResponse, error)
-	Create(input PlantCategoryClimateInput) (PlantCategoryClimateResponse, error)
-	Update(id int, input PlantCategoryClimateInput) (PlantCategoryClimateResponse, error)
+	Create(input PlantCategoryClimateInput, imageURL string) (PlantCategoryClimateResponse, error)
+	Update(id int, input PlantCategoryClimateInput, imageURL string) (PlantCategoryClimateResponse, error)
 	Delete(id int) (PlantCategoryClimateResponse, error)
 }
 
@@ -39,10 +39,10 @@ func (s *climateConditionService) FindByID(id int) (PlantCategoryClimateResponse
 	return NewClimateConditionResponse(condition), nil
 }
 
-func (s *climateConditionService) Create(input PlantCategoryClimateInput) (PlantCategoryClimateResponse, error) {
+func (s *climateConditionService) Create(input PlantCategoryClimateInput, imageURL string) (PlantCategoryClimateResponse, error) {
 	condition := ClimateCondition{
 		Name:     input.Name,
-		ImageURL: input.ImageURL,
+		ImageURL: imageURL,
 	}
 
 	newCondition, err := s.repository.Create(condition)
@@ -53,14 +53,17 @@ func (s *climateConditionService) Create(input PlantCategoryClimateInput) (Plant
 	return NewClimateConditionResponse(newCondition), nil
 }
 
-func (s *climateConditionService) Update(id int, input PlantCategoryClimateInput) (PlantCategoryClimateResponse, error) {
+func (s *climateConditionService) Update(id int, input PlantCategoryClimateInput, imageURL string) (PlantCategoryClimateResponse, error) {
 	condition, err := s.repository.FindByID(id)
 	if err != nil {
 		return PlantCategoryClimateResponse{}, err
 	}
 
 	condition.Name = input.Name
-	condition.ImageURL = input.ImageURL
+	if imageURL != "" {
+		condition.ImageURL = imageURL
+	}
+
 	updatedCondition, err := s.repository.Update(condition)
 	if err != nil {
 		return PlantCategoryClimateResponse{}, err

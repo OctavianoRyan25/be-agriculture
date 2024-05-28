@@ -1,59 +1,74 @@
 package plant
 
 type PlantCategoryClimateInput struct {
-	Name     string `json:"name" validate:"required"`
-	ImageURL string `json:"image_url"`
-}
-
-type UpdatePlantInput struct {
-	Name               string `json:"name" binding:"required"`
-	Description        string `json:"description" binding:"required"`
-	IsToxic            bool   `json:"is_toxic"`
-	HarvestDuration    int    `json:"harvest_duration"`
-	PlantCategoryID    int    `json:"plant_category_id"`
-	ClimateConditionID int    `json:"climate_condition_id"`
-	WateringScheduleID int    `json:"watering_schedule_id"`
-	PlantInstructionID int    `json:"plant_instruction_id"`
-	PlantFAQID         int    `json:"plant_faq_id"`
+	Name     string `form:"name" validate:"required"`
+	ImageURL string `form:"image_url"`
 }
 
 type CreatePlantInput struct {
-	Name               string                        `json:"name" validate:"required"`
-	Description        string                        `json:"description" validate:"required"`
-	IsToxic            bool                          `json:"is_toxic"`
-	HarvestDuration    int                           `json:"harvest_duration" validate:"required"`
-	PlantCategoryID    int                           `json:"plant_category_id" validate:"required"`
-	ClimateConditionID int                           `json:"climate_condition_id" validate:"required"`
-	WateringSchedule   CreateWateringScheduleInput   `json:"watering_schedule"`
-	PlantInstructions  []CreatePlantInstructionInput `json:"plant_instructions"`
-	PlantFAQs          []CreatePlantFAQInput         `json:"plant_faqs"`
-	PlantImages        []CreatePlantImageInput       `json:"plant_images" validate:"required,dive"`
+	Name               string                        `form:"name" validate:"required"`
+	Description        string                        `form:"description" validate:"required"`
+	IsToxic            bool                          `form:"is_toxic"`
+	HarvestDuration    int                           `form:"harvest_duration" validate:"required"`
+	Sunlight           string                        `form:"sunlight" validate:"required"`
+	PlantingTime       string                        `form:"planting_time" validate:"required"`
+	PlantCategoryID    int                           `form:"plant_category_id" validate:"required"`
+	ClimateCondition   string                        `form:"climate_condition" validate:"required"`
+	PlantCharateristic CreatePlantCharateristicInput `form:"plant_charateristic" validate:"required"`
+	WateringSchedule   CreateWateringScheduleInput   `form:"watering_schedule"`
+	PlantInstructions  []CreatePlantInstructionInput `form:"plant_instructions"`
+	PlantFAQs          []CreatePlantFAQInput         `form:"plant_faqs"`
+	PlantImages        []CreatePlantImageInput       `form:"plant_images" validate:"required,dive"`
+}
+
+type UpdatePlantInput struct {
+	Name               string                        `form:"name" validate:"required"`
+	Description        string                        `form:"description" validate:"required"`
+	IsToxic            bool                          `form:"is_toxic"`
+	HarvestDuration    int                           `form:"harvest_duration" validate:"required"`
+	Sunlight           string                        `form:"sunlight" validate:"required"`
+	PlantingTime       string                        `form:"planting_time" validate:"required"`
+	PlantCategoryID    int                           `form:"plant_category_id" validate:"required"`
+	ClimateCondition   string                        `form:"climate_condition" validate:"required"`
+	WateringSchedule   CreateWateringScheduleInput   `form:"watering_schedule"`
+	PlantCharateristic CreatePlantCharateristicInput `form:"plant_charateristic" validate:"required"`
+	PlantInstructions  []CreatePlantInstructionInput `form:"plant_instructions"`
+	PlantFAQs          []CreatePlantFAQInput         `form:"plant_faqs"`
+	PlantImages        []CreatePlantImageInput       `form:"plant_images" validate:"required,dive"`
 }
 
 type CreateWateringScheduleInput struct {
-	WateringFrequency    int    `json:"watering_frequency" validate:"required"`
-	Each                 string `json:"each" validate:"required"`
-	WateringAmount       int    `json:"watering_amount" validate:"required"`
-	Unit                 string `json:"unit" validate:"required"`
-	WateringTime         string `json:"watering_time" validate:"required"`
-	WeatherCondition     string `json:"weather_condition"`
-	ConditionDescription string `json:"condition_description"`
+	WateringFrequency    int    `form:"watering_frequency" validate:"required"`
+	Each                 string `form:"each" validate:"required"`
+	WateringAmount       int    `form:"watering_amount" validate:"required"`
+	Unit                 string `form:"unit" validate:"required"`
+	WateringTime         string `form:"watering_time" validate:"required"`
+	WeatherCondition     string `form:"weather_condition"`
+	ConditionDescription string `form:"condition_description"`
+}
+
+type CreatePlantCharateristicInput struct {
+	Height     int    `form:"height" validate:"required"`
+	HeightUnit string `form:"height_unit" validate:"required"`
+	Wide       int    `form:"wide" validate:"required"`
+	WideUnit   string `form:"wide_unit" validate:"required"`
+	LeafColor  string `form:"leaf_color" validate:"required"`
 }
 
 type CreatePlantInstructionInput struct {
-	StepNumber      int    `json:"step_number" validate:"required"`
-	StepTitle       string `json:"step_title" validate:"required"`
-	StepDescription string `json:"step_description" validate:"required"`
-	StepImageURL    string `json:"step_image_url"`
-	AdditionalTips  string `json:"additional_tips"`
+	StepNumber      int    `form:"step_number" validate:"required"`
+	StepTitle       string `form:"step_title" validate:"required"`
+	StepDescription string `form:"step_description" validate:"required"`
+	StepImageURL    string `form:"step_image_url"`
+	AdditionalTips  string `form:"additional_tips"`
 }
 
 type CreatePlantFAQInput struct {
-	Question string `json:"question" validate:"required"`
-	Answer   string `json:"answer" validate:"required"`
+	Question string `form:"question" validate:"required"`
+	Answer   string `form:"answer" validate:"required"`
 }
 
 type CreatePlantImageInput struct {
-	FileName  string `json:"file_name" validate:"required"`
-	IsPrimary int    `json:"is_primary"`
+	FileName  string `form:"file_name" validate:"required"`
+	IsPrimary int    `form:"is_primary"`
 }

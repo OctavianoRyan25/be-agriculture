@@ -1,21 +1,25 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
 	"github.com/OctavianoRyan25/be-agriculture/modules/plant"
 	"github.com/OctavianoRyan25/be-agriculture/utils/helper"
+	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
 
 type PlantCategoryHandler struct {
 	service plant.PlantCategoryService
+	cloudinary  *cloudinary.Cloudinary
 }
 
-func NewPlantCategoryHandler(service plant.PlantCategoryService) *PlantCategoryHandler {
-	return &PlantCategoryHandler{service}
+func NewPlantCategoryHandler(service plant.PlantCategoryService, cloudinary  *cloudinary.Cloudinary) *PlantCategoryHandler {
+	return &PlantCategoryHandler{service , cloudinary}
 }
 
 func (h *PlantCategoryHandler) GetAll(c echo.Context) error {
@@ -63,13 +67,39 @@ func (h *PlantCategoryHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response)
 	}
 
-	category, err := h.service.Create(input)
+	file, err := c.FormFile("image_url")
+	if err != nil {
+		response := helper.APIResponse("Failed to get uploaded image", http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	fileReader, err := file.Open()
+	if err != nil {
+		response := helper.APIResponse("Failed to open uploaded file", http.StatusInternalServerError, "error", nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+	defer fileReader.Close()
+
+	params := uploader.UploadParams{
+		Folder:    "be-agriculture",
+		// Overwrite: true,
+	}
+
+	uploadResult, err := h.cloudinary.Upload.Upload(context.Background(), fileReader, params)
+	if err != nil {
+		response := helper.APIResponse("Failed to upload image to Cloudinary", http.StatusInternalServerError, "error", nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	imageURL := uploadResult.SecureURL
+
+	_, err = h.service.Create(input, imageURL)
 	if err != nil {
 		response := helper.APIResponse("Failed to create plant category", http.StatusInternalServerError, "error", nil)
 		return c.JSON(http.StatusInternalServerError, response)
 	}
 
-	response := helper.APIResponse("Plant category created successfully", http.StatusCreated, "success", category)
+	response := helper.APIResponse("Plant category created successfully", http.StatusCreated, "success", nil)
 	return c.JSON(http.StatusCreated, response)
 }
 
@@ -95,7 +125,37 @@ func (h *PlantCategoryHandler) Update(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response)
 	}
 
-	category, err := h.service.Update(id, input)
+	// Handle file upload if a new file is provided
+	file, err := c.FormFile("image_url")
+	if err != nil && err != http.ErrMissingFile {
+		response := helper.APIResponse("Failed to get uploaded image", http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	var imageURL string
+	if file != nil {
+		fileReader, err := file.Open()
+		if err != nil {
+			response := helper.APIResponse("Failed to open uploaded file", http.StatusInternalServerError, "error", nil)
+			return c.JSON(http.StatusInternalServerError, response)
+		}
+		defer fileReader.Close()
+
+		params := uploader.UploadParams{
+			Folder: "be-agriculture",
+		}
+
+		uploadResult, err := h.cloudinary.Upload.Upload(context.Background(), fileReader, params)
+		if err != nil {
+			response := helper.APIResponse("Failed to upload image to Cloudinary", http.StatusInternalServerError, "error", nil)
+			return c.JSON(http.StatusInternalServerError, response)
+		}
+
+		imageURL = uploadResult.SecureURL
+	}
+
+	// Pass the image URL only if a new image was uploaded
+	category, err := h.service.Update(id, input, imageURL)
 	if err != nil {
 		response := helper.APIResponse("Failed to update plant category", http.StatusInternalServerError, "error", nil)
 		return c.JSON(http.StatusInternalServerError, response)
@@ -104,6 +164,7 @@ func (h *PlantCategoryHandler) Update(c echo.Context) error {
 	response := helper.APIResponse("Plant category updated successfully", http.StatusOK, "success", category)
 	return c.JSON(http.StatusOK, response)
 }
+
 
 func (h *PlantCategoryHandler) Delete(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
