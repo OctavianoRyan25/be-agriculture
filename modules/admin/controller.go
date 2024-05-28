@@ -4,22 +4,22 @@ import (
 	"net/http"
 
 	"github.com/OctavianoRyan25/be-agriculture/base"
-	"github.com/OctavianoRyan25/be-agriculture/helpers"
+	"github.com/OctavianoRyan25/be-agriculture/utils/helper"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
 
-type adminController struct {
+type AdminController struct {
 	adminUseCase adminUseCase
 }
 
-func NewUserController(adminUseCase adminUseCase) *adminController {
-	return &adminController{
+func NewUserController(adminUseCase adminUseCase) *AdminController {
+	return &AdminController{
 		adminUseCase: adminUseCase,
 	}
 }
 
-func (c *adminController) RegisterUser(ctx echo.Context) error {
+func (c *AdminController) RegisterUser(ctx echo.Context) error {
 	req := new(AdminRequest)
 	//Mapping UserRequest to User
 	err := ctx.Bind(&req)
@@ -68,7 +68,7 @@ func (c *adminController) RegisterUser(ctx echo.Context) error {
 	return ctx.JSON(code, res)
 }
 
-func (c *adminController) CheckEmail(ctx echo.Context) error {
+func (c *AdminController) CheckEmail(ctx echo.Context) error {
 	req := new(CheckEmailRequest)
 	err := ctx.Bind(&req)
 	if err != nil {
@@ -98,7 +98,7 @@ func (c *adminController) CheckEmail(ctx echo.Context) error {
 	return ctx.JSON(code, res)
 }
 
-func (c *adminController) Login(ctx echo.Context) error {
+func (c *AdminController) Login(ctx echo.Context) error {
 	req := new(LoginRequest)
 	err := ctx.Bind(&req)
 	if err != nil {
@@ -143,7 +143,7 @@ func (c *adminController) Login(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, errRes)
 	}
 
-	token, err := helpers.GenerateToken(uint(user.ID), user.Email, "admin")
+	token, err := helper.GenerateToken(uint(user.ID), user.Email, "admin")
 	if err != nil {
 		errRes := base.ErrorResponse{
 			Status:  "error",
@@ -164,7 +164,7 @@ func (c *adminController) Login(ctx echo.Context) error {
 	return ctx.JSON(code, res)
 }
 
-func (c *adminController) GetUserProfile(ctx echo.Context) error {
+func (c *AdminController) GetUserProfile(ctx echo.Context) error {
 	userId := ctx.Get("user_id").(uint)
 	if userId == 0 {
 		errRes := base.ErrorResponse{

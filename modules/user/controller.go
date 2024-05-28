@@ -4,22 +4,22 @@ import (
 	"net/http"
 
 	"github.com/OctavianoRyan25/be-agriculture/base"
-	"github.com/OctavianoRyan25/be-agriculture/helpers"
+	"github.com/OctavianoRyan25/be-agriculture/utils/helper"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
 
-type userController struct {
+type UserController struct {
 	userUseCase UserUseCase
 }
 
-func NewUserController(userUseCase UserUseCase) *userController {
-	return &userController{
+func NewUserController(userUseCase UserUseCase) *UserController {
+	return &UserController{
 		userUseCase: userUseCase,
 	}
 }
 
-func (c *userController) RegisterUser(ctx echo.Context) error {
+func (c *UserController) RegisterUser(ctx echo.Context) error {
 	req := new(UserRequest)
 	//Mapping UserRequest to User
 	err := ctx.Bind(&req)
@@ -78,7 +78,7 @@ func (c *userController) RegisterUser(ctx echo.Context) error {
 	return ctx.JSON(code, res)
 }
 
-func (c *userController) CheckEmail(ctx echo.Context) error {
+func (c *UserController) CheckEmail(ctx echo.Context) error {
 	req := new(CheckEmailRequest)
 	err := ctx.Bind(&req)
 	if err != nil {
@@ -108,7 +108,7 @@ func (c *userController) CheckEmail(ctx echo.Context) error {
 	return ctx.JSON(code, res)
 }
 
-func (c *userController) VerifyEmail(ctx echo.Context) error {
+func (c *UserController) VerifyEmail(ctx echo.Context) error {
 	req := new(OTPRequest)
 	err := ctx.Bind(&req)
 	if err != nil {
@@ -138,7 +138,7 @@ func (c *userController) VerifyEmail(ctx echo.Context) error {
 	return ctx.JSON(code, res)
 }
 
-func (c *userController) Login(ctx echo.Context) error {
+func (c *UserController) Login(ctx echo.Context) error {
 	req := new(LoginRequest)
 	err := ctx.Bind(&req)
 	if err != nil {
@@ -183,7 +183,7 @@ func (c *userController) Login(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, errRes)
 	}
 
-	token, err := helpers.GenerateToken(uint(user.ID), user.Email, "user")
+	token, err := helper.GenerateToken(uint(user.ID), user.Email, "user")
 	if err != nil {
 		errRes := base.ErrorResponse{
 			Status:  "error",
@@ -204,7 +204,7 @@ func (c *userController) Login(ctx echo.Context) error {
 	return ctx.JSON(code, res)
 }
 
-func (c *userController) GetUserProfile(ctx echo.Context) error {
+func (c *UserController) GetUserProfile(ctx echo.Context) error {
 	userId := ctx.Get("user_id").(uint)
 	if userId == 0 {
 		errRes := base.ErrorResponse{

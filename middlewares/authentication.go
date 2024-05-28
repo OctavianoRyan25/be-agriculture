@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/OctavianoRyan25/be-agriculture/constants"
-	"github.com/OctavianoRyan25/be-agriculture/helpers"
+	"github.com/OctavianoRyan25/be-agriculture/utils/helper"
 	"github.com/labstack/echo/v4"
 )
 
@@ -12,7 +12,7 @@ func Authentication() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			// Verifikasi token JWT
-			claims, err := helpers.VerifyToken(c)
+			claims, err := helper.VerifyToken(c)
 			if err != nil {
 				return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 					"error":      constants.ErrAuthenticationFailed,

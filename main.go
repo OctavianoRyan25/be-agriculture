@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/OctavianoRyan25/be-agriculture/configs"
-	"github.com/OctavianoRyan25/be-agriculture/middlewares"
 	"github.com/OctavianoRyan25/be-agriculture/modules/admin"
 	"github.com/OctavianoRyan25/be-agriculture/modules/user"
+	"github.com/OctavianoRyan25/be-agriculture/router"
 	"github.com/labstack/echo/v4"
 )
 
@@ -35,21 +34,7 @@ func main() {
 	useCaseAdmin := admin.NewUseCase(repoAdmin)
 	controllerAdmin := admin.NewUserController(*useCaseAdmin)
 
-	group := e.Group("/api/v1")
-	group.POST("/register", controller.RegisterUser)
-	group.POST("/check-email", controller.CheckEmail)
-	group.POST("/verify", controller.VerifyEmail)
-	group.POST("/login", controller.Login)
-	group.GET("/profile", controller.GetUserProfile, middlewares.Authentication())
-
-	groupAdmin := e.Group("/api/v1/admin")
-	groupAdmin.POST("/register", controllerAdmin.RegisterUser)
-	groupAdmin.POST("/login", controllerAdmin.Login)
-	groupAdmin.GET("/profile", controllerAdmin.GetUserProfile, middlewares.Authentication())
-
-	group.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+	router.InitRoutes(e, controller, controllerAdmin)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
