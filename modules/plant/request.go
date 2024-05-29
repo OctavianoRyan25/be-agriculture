@@ -72,3 +72,8 @@ type CreatePlantImageInput struct {
 	FileName  string `form:"file_name" validate:"required"`
 	IsPrimary int    `form:"is_primary"`
 }
+
+type AddUserPlantInput struct {
+	UserID  int `json:"user_id" form:"user_id" validate:"required"`
+	PlantID int `json:"plant_id" form:"plant_id" validate:"required"`
+}

@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func InitRoutes(e *echo.Echo, userController *user.UserController, adminController *admin.AdminController, plantCategoryHandler *handler.PlantCategoryHandler, plantHandler *handler.PlantHandler) {
+func InitRoutes(e *echo.Echo, userController *user.UserController, adminController *admin.AdminController, plantCategoryHandler *handler.PlantCategoryHandler, plantHandler *handler.PlantHandler, plantUserHandler *handler.UserPlantHandler) {
 	group := e.Group("/api/v1")
 	group.POST("/register", userController.RegisterUser)
 	group.POST("/check-email", userController.CheckEmail)
@@ -34,6 +34,10 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	groupAdmin.POST("/plants", plantHandler.Create, middlewares.Authentication())           
 	groupAdmin.PUT("/plants/:id", plantHandler.Update, middlewares.Authentication())         
 	groupAdmin.DELETE("/plants/:id", plantHandler.Delete, middlewares.Authentication())
+
+	group.GET("/my/plants/:user_id", plantUserHandler.GetUserPlants)
+	group.POST("/my/plants/add", plantUserHandler.AddUserPlant)
+	group.DELETE("/my/plants/:user_plant_id", plantUserHandler.DeleteUserPlantByID)
 
 	group.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")

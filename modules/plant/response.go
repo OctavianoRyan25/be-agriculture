@@ -185,3 +185,32 @@ func NewPlantFAQResponse(faq PlantFAQ) PlantFAQResponse {
 		CreatedAt : faq.CreatedAt,
 	}
 }
+
+type UserPlantResponse struct {
+	ID        int       `json:"id"`
+	Plant     PlantResponse `json:"plant"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func NewUserPlantResponse(userPlant UserPlant) UserPlantResponse {
+	return UserPlantResponse{
+		ID:        userPlant.ID,
+		Plant:     NewPlantResponse(userPlant.Plant),
+		CreatedAt: userPlant.CreatedAt,
+	}
+}
+
+func NewUserPlantResponses(userPlants []UserPlant) map[int][]UserPlantResponse {
+	responses := make(map[int][]UserPlantResponse)
+
+	for _, userPlant := range userPlants {
+		userID := userPlant.UserID
+		if _, ok := responses[userID]; !ok {
+			responses[userID] = make([]UserPlantResponse, 0)
+		}
+		responses[userID] = append(responses[userID], NewUserPlantResponse(userPlant))
+	}
+
+	return responses
+}
+

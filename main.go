@@ -55,7 +55,11 @@ func main() {
 	plantService := plant.NewPlantService(plantRepository, plantCategoryRepository)
 	plantHandler := handler.NewPlantHandler(plantService, cloudinary)
 
-	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler)
+	plantUserRepository := plant.NewUserPlantRepository(db)
+	plantUserService := plant.NewUserPlantService(plantUserRepository)
+	plantUserHandler := handler.NewUserPlantHandler(plantUserService)
+
+	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

@@ -2,6 +2,8 @@ package plant
 
 import (
 	"time"
+
+	"github.com/OctavianoRyan25/be-agriculture/modules/user"
 )
 
 type Plant struct {
@@ -87,4 +89,15 @@ type PlantCategory struct {
 	ImageURL 						 string 						`json:"image_url"`
 	CreatedAt         	 time.Time          `json:"created_at"`
 	UpdatedAt         	 time.Time          `json:"updated_at"`
+}
+
+type UserPlant struct {
+	ID         					 int 								`json:"id" gorm:"primaryKey"`
+	UserID     					 int								`json:"user_id"`
+	PlantID    					 int 								`json:"plant_id"`
+	CreatedAt  					 time.Time	  			`json:"created_at"`
+	UpdatedAt  					 time.Time 					`json:"updated_at"`
+	
+	Plant      					 Plant     					`json:"plant" gorm:"foreignKey:PlantID;references:ID"`
+	User 								 user.User 					`json:"user" gorm:"foreignKey:UserID;references:ID"`
 }
