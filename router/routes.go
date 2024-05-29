@@ -1,51 +1,41 @@
 package router
 
 import (
-	"fmt"
+	"net/http"
 
 	"github.com/OctavianoRyan25/be-agriculture/handler"
-	"github.com/OctavianoRyan25/be-agriculture/modules/plant"
-	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/OctavianoRyan25/be-agriculture/middlewares"
+	"github.com/OctavianoRyan25/be-agriculture/modules/admin"
+	"github.com/OctavianoRyan25/be-agriculture/modules/user"
 	"github.com/labstack/echo/v4"
-	"gorm.io/gorm"
 )
 
-func SetupRoutes(e *echo.Echo, db *gorm.DB) {
-	cloudinary, err := initCloudinary()
-		if err != nil {
-			fmt.Println("Failed to initialize Cloudinary:", err)
-			return
-		}
+func InitRoutes(e *echo.Echo, userController *user.UserController, adminController *admin.AdminController, plantCategoryHandler *handler.PlantCategoryHandler, plantHandler *handler.PlantHandler) {
+	group := e.Group("/api/v1")
+	group.POST("/register", userController.RegisterUser)
+	group.POST("/check-email", userController.CheckEmail)
+	group.POST("/verify", userController.VerifyEmail)
+	group.POST("/login", userController.Login)
+	group.GET("/profile", userController.GetUserProfile, middlewares.Authentication())
 
-  plantCategoryRepository := plant.NewPlantCategoryRepository(db)
-  plantCategoryService := plant.NewPlantCategoryService(plantCategoryRepository)
-  plantCategoryHandler := handler.NewPlantCategoryHandler(plantCategoryService, cloudinary)
+	groupAdmin := e.Group("/api/v1/admin")
+	groupAdmin.POST("/register", adminController.RegisterUser)
+	groupAdmin.POST("/login", adminController.Login)
+	groupAdmin.GET("/profile", adminController.GetUserProfile, middlewares.Authentication())
 
-	plantRepository := plant.NewPlantRepository(db)
-	plantService := plant.NewPlantService(plantRepository, plantCategoryRepository)
-	plantHandler := handler.NewPlantHandler(plantService, cloudinary)
+	group.GET("/plants/categories", plantCategoryHandler.GetAll)
+	group.GET("/plants/categories/:id", plantCategoryHandler.GetByID)
+	groupAdmin.POST("/plants/categories", plantCategoryHandler.Create, middlewares.Authentication())
+	groupAdmin.PUT("/plants/categories/:id", plantCategoryHandler.Update, middlewares.Authentication())
+	groupAdmin.DELETE("/plants/categories/:id", plantCategoryHandler.Delete, middlewares.Authentication())
 
-	v1 := e.Group("/api/v1")
-	{
-		v1.GET("/admin/plants/categories", plantCategoryHandler.GetAll)
-		v1.GET("/admin/plants/categories/:id", plantCategoryHandler.GetByID)
-		v1.POST("/admin/plants/categories", plantCategoryHandler.Create)
-		v1.PUT("/admin/plants/categories/:id", plantCategoryHandler.Update)
-		v1.DELETE("/admin/plants/categories/:id", plantCategoryHandler.Delete)
-		
-		v1.GET("/admin/plants", plantHandler.GetAll)            
-		v1.GET("/admin/plants/:id", plantHandler.GetByID)        
-		v1.POST("/admin/plants", plantHandler.Create)           
-		v1.PUT("/admin/plants/:id", plantHandler.Update)         
-		v1.DELETE("/admin/plants/:id", plantHandler.Delete) 
-	}
-}
+	group.GET("/plants", plantHandler.GetAll)            
+	group.GET("/plants/:id", plantHandler.GetByID)        
+	groupAdmin.POST("/plants", plantHandler.Create, middlewares.Authentication())           
+	groupAdmin.PUT("/plants/:id", plantHandler.Update, middlewares.Authentication())         
+	groupAdmin.DELETE("/plants/:id", plantHandler.Delete, middlewares.Authentication())
 
-func initCloudinary() (*cloudinary.Cloudinary, error) {
-	cloudinaryURL := ""
-	cloudinary, err := cloudinary.NewFromURL(cloudinaryURL)
-	if err != nil {
-			return nil, err
-	}
-	return cloudinary, nil
+	group.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	})
 }
