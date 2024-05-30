@@ -1,10 +1,10 @@
-package modules
+package fertilizer
 
 import (
 	"time"
 )
 
-type FertilizerRequest struct {
+type FertilizerResponse struct {
 	Id int `json:"id" gorm:"primaryKey"`
 	Name string `json:"name"`
 	Compostition string `json:"compostition"`
