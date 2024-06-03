@@ -11,6 +11,7 @@ type UserResponse struct {
 	Is_Active  bool      `json:"is_active"`
 	OTP        string    `json:"otp"`
 	Url_Image  string    `json:"url_image"`
+	FCMToken   string    `json:"fcm_token"`
 	Created_at time.Time `json:"created_at"`
 }
 

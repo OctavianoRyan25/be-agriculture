@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/OctavianoRyan25/be-agriculture/configs"
 	"github.com/OctavianoRyan25/be-agriculture/handler"
@@ -34,10 +33,10 @@ func main() {
 	}
 
 	cloudinary, err := initCloudinary()
-		if err != nil {
-			fmt.Println("Failed to initialize Cloudinary:", err)
-			return
-		}
+	if err != nil {
+		fmt.Println("Failed to initialize Cloudinary:", err)
+		return
+	}
 
 	repo := user.NewRepository(db)
 	useCase := user.NewUseCase(repo)
@@ -48,8 +47,8 @@ func main() {
 	controllerAdmin := admin.NewUserController(*useCaseAdmin)
 
 	plantCategoryRepository := plant.NewPlantCategoryRepository(db)
-  plantCategoryService := plant.NewPlantCategoryService(plantCategoryRepository)
-  plantCategoryHandler := handler.NewPlantCategoryHandler(plantCategoryService, cloudinary)
+	plantCategoryService := plant.NewPlantCategoryService(plantCategoryRepository)
+	plantCategoryHandler := handler.NewPlantCategoryHandler(plantCategoryService, cloudinary)
 
 	plantRepository := plant.NewPlantRepository(db)
 	plantService := plant.NewPlantService(plantRepository, plantCategoryRepository)
@@ -65,11 +64,13 @@ func main() {
 }
 
 func initCloudinary() (*cloudinary.Cloudinary, error) {
-	cloudinaryURL := os.Getenv("CLOUDINARY_URL")
+	//Production
+	//cloudinaryURL := os.Getenv("CLOUDINARY_URL")
+	//Development
+	cloudinaryURL := "cloudinary://985586974845469:PGaIo6o1qfPg54_o_zA4poyj49o@dxrz0cg5z"
 	cloudinary, err := cloudinary.NewFromURL(cloudinaryURL)
 	if err != nil {
-			return nil, err
+		return nil, err
 	}
 	return cloudinary, nil
 }
-

@@ -66,8 +66,10 @@ func (uc *userUseCase) SendEmailVerification(user *User) (int, error) {
 
 	OTP := user.OTP
 	username := user.Name
-
-	path := filepath.Join("/app", "modules", "user", "template", "base.html")
+	//Production
+	//path := filepath.Join("/app", "modules", "user", "template", "base.html")
+	//Development
+	path := filepath.Join("modules", "user", "template", "base.html")
 	template, err := template.ParseFiles(path)
 	if err != nil {
 		return constants.ErrCodeBadRequest, err
