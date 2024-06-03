@@ -4,9 +4,10 @@ import "gorm.io/gorm"
 
 type UserPlantRepository interface {
 	AddUserPlant(userPlant UserPlant) (UserPlant, error)
-	GetUserPlantsByUserID(userID int) ([]UserPlant, error)
+	GetUserPlantsByUserID(userID int, limit int, offset int) ([]UserPlant, error)
 	DeleteUserPlantByID(userPlantID int) error
 	GetUserPlantByID(userPlantID int) (UserPlant, error)
+	CountByUserID(userID int, count *int64) error
 }
 
 type userPlantRepository struct {
@@ -35,18 +36,30 @@ func (r *userPlantRepository) AddUserPlant(userPlant UserPlant) (UserPlant, erro
 	return userPlant, err
 }
 
-func (r *userPlantRepository) GetUserPlantsByUserID(userID int) ([]UserPlant, error) {
+func (r *userPlantRepository) GetUserPlantsByUserID(userID int, limit int, offset int) ([]UserPlant, error) {
 	var userPlants []UserPlant
-	err := r.db.Preload("Plant").
-			Preload("Plant.PlantCategory").
-			Preload("Plant.PlantCharacteristic").
-			Preload("Plant.WateringSchedule").
-			Preload("Plant.PlantInstructions").
-			Preload("Plant.PlantFAQs").
-			Preload("Plant.PlantImages").
-			Where("user_id = ?", userID).Find(&userPlants).Error
+	query := r.db.Preload("Plant").
+		Preload("Plant.PlantCategory").
+		Preload("Plant.PlantCharacteristic").
+		Preload("Plant.WateringSchedule").
+		Preload("Plant.PlantInstructions").
+		Preload("Plant.PlantFAQs").
+		Preload("Plant.PlantImages").
+		Where("user_id = ?", userID)
+
+	if limit > 0 {
+		query = query.Limit(limit)
+	}
+
+	if offset >= 0 {
+		query = query.Offset(offset)
+	}
+
+	err := query.Find(&userPlants).Error
 	return userPlants, err
 }
+
+
 
 func (r *userPlantRepository) DeleteUserPlantByID(userPlantID int) error {
 	return r.db.Where("id = ?", userPlantID).Delete(&UserPlant{}).Error
@@ -68,4 +81,8 @@ func (r *userPlantRepository) GetUserPlantByID(userPlantID int) (UserPlant, erro
 			return UserPlant{}, err
 	}
 	return userPlant, nil
+}
+
+func (r *userPlantRepository) CountByUserID(userID int, count *int64) error {
+	return r.db.Model(&UserPlant{}).Where("user_id = ?", userID).Count(count).Error
 }

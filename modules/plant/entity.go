@@ -27,6 +27,15 @@ type Plant struct {
 	UpdatedAt         	 time.Time          `json:"updated_at"`
 }
 
+type PlantProgress struct {
+	ID           				 int     						`json:"id" gorm:"primaryKey"`
+	PlantID      				 int     						`json:"plant_id"`
+	UserID       				 int     						`json:"user_id"`
+	ImageURL   				 string  							`json:"image_url"`
+	CreatedAt         	 time.Time          `json:"created_at"`
+	UpdatedAt         	 time.Time          `json:"updated_at"`
+}
+
 type PlantCharacteristic struct {
 	ID         					 int    						`json:"id" gorm:"primaryKey"`
 	PlantID    					 int    						`json:"plant_id"`
@@ -49,12 +58,22 @@ type PlantReminder struct {
 	ConditionDescription string 					 	`json:"condition_description"`
 	CreatedAt         	 time.Time         	`json:"created_at"`
 	UpdatedAt         	 time.Time         	`json:"updated_at"`
+}
 
+type PlantInstructionCategory struct {
+	ID        					 int    						`json:"id" gorm:"primaryKey"`
+	Name      					 string 						`json:"name"`
+	Description 				 string 						`json:"description"`
+	ImageURL 						 string 						`json:"image_url"`
+	CreatedAt         	 time.Time          `json:"created_at"`
+	UpdatedAt         	 time.Time          `json:"updated_at"`
 }
 
 type PlantInstruction struct {
 	ID             	 		 int    						`json:"id" gorm:"primaryKey"`
 	PlantID         		 int    						`json:"plant_id"`
+	InstructionCategoryID int                `json:"instruction_category_id"`
+	InstructionCategory   PlantInstructionCategory `json:"instruction_category" gorm:"foreignKey:InstructionCategoryID;references:ID"`
 	StepNumber      		 int    						`json:"step_number"`
 	StepTitle       		 string 						`json:"step_title"`
 	StepDescription 		 string 						`json:"step_description"`

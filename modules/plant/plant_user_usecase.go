@@ -2,8 +2,10 @@ package plant
 
 type UserPlantService interface {
 	AddUserPlant(input AddUserPlantInput) (UserPlantResponse, error)
-	GetUserPlantsByUserID(userID int) (map[int][]UserPlantResponse, error)
+	GetUserPlantsByUserID(userID int, limit int, offset int) (map[int][]UserPlantResponse, error)
 	DeleteUserPlantByID(userPlantID int) (UserPlantResponse, error)
+	GetUserPlantByID(userPlantID int) (UserPlant, error)
+	CountByUserID(userID int) (int64, error)
 }
 
 type userPlantService struct {
@@ -28,8 +30,15 @@ func (s *userPlantService) AddUserPlant(input AddUserPlantInput) (UserPlantRespo
 	return NewUserPlantResponse(newUserPlant), nil
 }
 
-func (s *userPlantService) GetUserPlantsByUserID(userID int) (map[int][]UserPlantResponse, error) {
-	userPlants, err := s.repository.GetUserPlantsByUserID(userID)
+func (s *userPlantService) GetUserPlantsByUserID(userID int, limit int, page int) (map[int][]UserPlantResponse, error) {
+	offset := (page - 1) * limit
+
+	if limit <= 0 {
+		limit = -1
+		offset = -1
+	}
+
+	userPlants, err := s.repository.GetUserPlantsByUserID(userID, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -51,4 +60,14 @@ func (s *userPlantService) DeleteUserPlantByID(userPlantID int) (UserPlantRespon
 	deletedUserPlantResponse := NewUserPlantResponse(deletedUserPlant)
 
 	return deletedUserPlantResponse, nil
+}
+
+func (s *userPlantService) GetUserPlantByID(userPlantID int) (UserPlant, error) {
+	return s.repository.GetUserPlantByID(userPlantID)
+}
+
+func (s *userPlantService) CountByUserID(userID int) (int64, error) {
+	var count int64
+	err := s.repository.CountByUserID(userID, &count)
+	return count, err
 }
