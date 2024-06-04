@@ -60,6 +60,12 @@ func (h *PlantInstructionCategoryHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response)
 	}
 
+	role := c.Get("role").(string)
+	if role != "admin" {
+		response := helper.APIResponse("Only admin can create", http.StatusUnauthorized, "error", nil)
+		return c.JSON(http.StatusUnauthorized, response)
+	}
+
 	validate := validator.New()
 	if err := validate.Struct(input); err != nil {
 		errors := helper.FormatValidationError(err)
@@ -109,6 +115,12 @@ func (h *PlantInstructionCategoryHandler) Update(c echo.Context) error {
 	if err != nil {
 		response := helper.APIResponse("Invalid ID", http.StatusBadRequest, "error", nil)
 		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	role := c.Get("role").(string)
+	if role != "admin" {
+		response := helper.APIResponse("Only admin can update", http.StatusUnauthorized, "error", nil)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 
 	var input plant.PlantInstructionCategoryInput
@@ -172,6 +184,12 @@ func (h *PlantInstructionCategoryHandler) Delete(c echo.Context) error {
 	if err != nil {
 		response := helper.APIResponse("Invalid ID", http.StatusBadRequest, "error", nil)
 		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	role := c.Get("role").(string)
+	if role != "admin" {
+		response := helper.APIResponse("Only admin can delete", http.StatusUnauthorized, "error", nil)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 
 	category, err := h.service.FindByID(id)
