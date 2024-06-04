@@ -101,6 +101,12 @@ func (h *PlantHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response)
 	}
 
+	role := c.Get("role").(string)
+	if role != "admin" {
+		response := helper.APIResponse("Only admin can create plant", http.StatusUnauthorized, "error", nil)
+		return c.JSON(http.StatusUnauthorized, response)
+	}
+
 	var input plant.CreatePlantInput
 
 	input.Name = form.Value["name"][0]
@@ -222,6 +228,12 @@ func (h *PlantHandler) Update(c echo.Context) error {
 	if err != nil {
 		response := helper.APIResponse("Invalid plant ID", http.StatusBadRequest, "error", nil)
 		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	role := c.Get("role").(string)
+	if role != "admin" {
+		response := helper.APIResponse("Only admin can update plant", http.StatusUnauthorized, "error", nil)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 
 	form, err := c.MultipartForm()
@@ -347,6 +359,12 @@ func (h *PlantHandler) Delete(c echo.Context) error {
 	if err != nil {
 			response := helper.APIResponse("Invalid ID", http.StatusBadRequest, "error", nil)
 			return c.JSON(http.StatusBadRequest, response)
+	}
+
+	role := c.Get("role").(string)
+	if role != "admin" {
+		response := helper.APIResponse("Only admin can update plant", http.StatusUnauthorized, "error", nil)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
 
 	deletedPlant, err := h.service.DeletePlant(id)
