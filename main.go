@@ -7,6 +7,7 @@ import (
 	"github.com/OctavianoRyan25/be-agriculture/handler"
 	"github.com/OctavianoRyan25/be-agriculture/modules/admin"
 	"github.com/OctavianoRyan25/be-agriculture/modules/plant"
+	"github.com/OctavianoRyan25/be-agriculture/modules/search"
 	"github.com/OctavianoRyan25/be-agriculture/modules/user"
 	"github.com/OctavianoRyan25/be-agriculture/modules/weather"
 	"github.com/OctavianoRyan25/be-agriculture/router"
@@ -22,6 +23,7 @@ func main() {
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.CORS())
 
 	db, err := configs.InitDB()
 	if err != nil {
@@ -67,10 +69,14 @@ func main() {
 	plantUserService := plant.NewUserPlantService(plantUserRepository)
 	plantUserHandler := handler.NewUserPlantHandler(plantUserService)
 
-  weatherService := weather.NewWeatherService()
-  weatherHandler := handler.NewWeatherHandler(weatherService)
+	weatherService := weather.NewWeatherService()
+	weatherHandler := handler.NewWeatherHandler(weatherService)
 
-	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler)
+	searchRepository := search.NewRepository(db)
+	searchUsecase := search.NewUsecase(searchRepository)
+	searchController := search.NewSearchController(searchUsecase)
+
+	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler, searchController)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

@@ -17,5 +17,12 @@ func NewUsecase(repo Repository) *searchUsecase {
 }
 
 func (uc *searchUsecase) Search(params PlantSearchParams) ([]plant.Plant, error) {
-	return uc.repo.Search(params)
+	plants, err := uc.repo.Search(params)
+	if err != nil {
+		return nil, err
+	}
+	if len(plants) == 0 {
+		return nil, nil
+	}
+	return plants, nil
 }

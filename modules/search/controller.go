@@ -38,6 +38,13 @@ func (c *SearchController) Search(ctx echo.Context) error {
 		}
 		return ctx.JSON(http.StatusInternalServerError, errRes)
 	}
-
+	if plants == nil {
+		res := base.SuccessResponse{
+			Status:  "success",
+			Message: "No data found",
+			Data:    nil,
+		}
+		return ctx.JSON(http.StatusOK, res)
+	}
 	return ctx.JSON(http.StatusOK, plants)
 }

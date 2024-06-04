@@ -30,7 +30,7 @@ func (r *searchRepo) Search(params PlantSearchParams) ([]plant.Plant, error) {
 		query = query.Where("name LIKE ?", "%"+params.Name+"%")
 	}
 	if params.PlantCategory != "" {
-		query = query.Where("plant_category = ?", params.PlantCategory)
+		query = query.Where("plant_category_id = ?", params.PlantCategory)
 	}
 	if params.DifficultyLevel != "" {
 		query = query.Where("difficulty_level = ?", params.DifficultyLevel)
