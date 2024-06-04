@@ -24,14 +24,59 @@ func NewPlantHandler(service plant.PlantService, 	cloudinary  *cloudinary.Cloudi
 }
 
 func (h *PlantHandler) GetAll(c echo.Context) error {
-	plants, err := h.service.FindAll()
-	if err != nil {
-		response := helper.APIResponse("Failed to fetch plants", http.StatusInternalServerError, "error", nil)
-		return c.JSON(http.StatusInternalServerError, response)
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil || page <= 0 {
+			page = 0 // Default value
 	}
-	response := helper.APIResponse("Plants fetched successfully", http.StatusOK, "success", plants)
+
+	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	if err != nil || limit <= 0 {
+			limit = 0 // Default value
+	}
+
+	if page > 0 && limit > 0 {
+			totalCount, err := h.service.CountAll()
+			if err != nil {
+					response := helper.APIResponse("Failed to count plants", http.StatusInternalServerError, "error", nil)
+					return c.JSON(http.StatusInternalServerError, response)
+			}
+
+			if int64((page-1)*limit) >= totalCount {
+					response := helper.APIResponse("Page exceeds available data", http.StatusBadRequest, "error", nil)
+					return c.JSON(http.StatusBadRequest, response)
+			}
+	}
+
+	plants, err := h.service.FindAll(page, limit)
+	if err != nil {
+			response := helper.APIResponse("Failed to fetch plants", http.StatusInternalServerError, "error", nil)
+			return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	responseData := struct {
+			Plants      []plant.PlantResponse `json:"plants"`
+			Limit       int                   `json:"limit"`
+			Page        int                   `json:"page"`
+			TotalCount  int64                 `json:"total_count,omitempty"`
+			TotalPages  int                   `json:"total_pages,omitempty"`
+	}{
+			Plants:     plants,
+			Limit:      limit,
+			Page:       page,
+	}
+
+	if page > 0 && limit > 0 {
+			totalCount, err := h.service.CountAll()
+			if err == nil {
+					responseData.TotalCount = totalCount
+					responseData.TotalPages = int((totalCount + int64(limit) - 1) / int64(limit))
+			}
+	}
+
+	response := helper.APIResponse("Plants fetched successfully", http.StatusOK, "success", responseData)
 	return c.JSON(http.StatusOK, response)
 }
+
 
 func (h *PlantHandler) GetByID(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
@@ -91,6 +136,7 @@ func (h *PlantHandler) Create(c echo.Context) error {
 	instructionFiles := form.File["plant_instructions.step_image_url"]
 	for i := 0; i < len(form.Value["plant_instructions.step_number"]); i++ {
 		instruction := plant.CreatePlantInstructionInput{
+			InstructionCategoryID: atoi(form.Value["plant_instructions.instruction_category_id"][i]),
 			StepNumber:      atoi(form.Value["plant_instructions.step_number"][i]),
 			StepTitle:       form.Value["plant_instructions.step_title"][i],
 			StepDescription: form.Value["plant_instructions.step_description"][i],
@@ -219,6 +265,7 @@ func (h *PlantHandler) Update(c echo.Context) error {
 	instructionFiles := form.File["plant_instructions.step_image_url"]
 	for i := 0; i < len(form.Value["plant_instructions.step_number"]); i++ {
 		instruction := plant.CreatePlantInstructionInput{
+			InstructionCategoryID: atoi(form.Value["plant_instructions.instruction_category_id"][i]),
 			StepNumber:      atoi(form.Value["plant_instructions.step_number"][i]),
 			StepTitle:       form.Value["plant_instructions.step_title"][i],
 			StepDescription: form.Value["plant_instructions.step_description"][i],
@@ -309,6 +356,52 @@ func (h *PlantHandler) Delete(c echo.Context) error {
 	}
 
 	response := helper.APIResponse("Plant deleted successfully", http.StatusOK, "success", deletedPlant)
+	return c.JSON(http.StatusOK, response)
+}
+
+func (h *PlantHandler) SearchPlantsByName(c echo.Context) error {
+	name := c.QueryParam("name")
+	if name == "" {
+		response := helper.APIResponse("Name parameter is required", http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil || page <= 0 {
+		page = 1
+	}
+
+	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	if err != nil || limit <= 0 {
+		limit = 10
+	}
+
+	plants, totalCount, err := h.service.SearchPlantsByName(name, page, limit)
+	if err != nil {
+		response := helper.APIResponse("Failed to search plants", http.StatusInternalServerError, "error", nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	if totalCount == 0 {
+		response := helper.APIResponse("No plants found with the given name", http.StatusNotFound, "error", nil)
+		return c.JSON(http.StatusNotFound, response)
+	}
+
+	responseData := struct {
+		Plants     []plant.Plant `json:"plants"`
+		TotalCount int64         `json:"total_count"`
+		Limit      int           `json:"limit"`
+		Page       int           `json:"page"`
+		TotalPages int           `json:"total_pages"`
+	}{
+		Plants:     plants,
+		TotalCount: totalCount,
+		Limit:      limit,
+		Page:       page,
+		TotalPages: int((totalCount + int64(limit) - 1) / int64(limit)),
+	}
+
+	response := helper.APIResponse("Plants fetched successfully", http.StatusOK, "success", responseData)
 	return c.JSON(http.StatusOK, response)
 }
 

@@ -5,6 +5,12 @@ type PlantCategoryClimateInput struct {
 	ImageURL string `form:"image_url"`
 }
 
+type PlantInstructionCategoryInput struct {
+	Name        string `form:"name" validate:"required"`
+	Description string `form:"description" validate:"required"`
+	ImageURL    string `form:"image_url"`
+}
+
 type CreatePlantInput struct {
 	Name                string                         `form:"name" validate:"required"`
 	Description         string                         `form:"description" validate:"required"`
@@ -56,11 +62,12 @@ type CreatePlantCharacteristicInput struct {
 }
 
 type CreatePlantInstructionInput struct {
-	StepNumber      int    `form:"step_number" validate:"required"`
-	StepTitle       string `form:"step_title" validate:"required"`
-	StepDescription string `form:"step_description" validate:"required"`
-	StepImageURL    string `form:"step_image_url"`
-	AdditionalTips  string `form:"additional_tips"`
+	InstructionCategoryID int    `form:"instruction_category_id" validate:"required"`
+	StepNumber            int    `form:"step_number" validate:"required"`
+	StepTitle             string `form:"step_title" validate:"required"`
+	StepDescription       string `form:"step_description" validate:"required"`
+	StepImageURL          string `form:"step_image_url"`
+	AdditionalTips        string `form:"additional_tips"`
 }
 
 type CreatePlantFAQInput struct {
@@ -74,6 +81,12 @@ type CreatePlantImageInput struct {
 }
 
 type AddUserPlantInput struct {
-	UserID  int `json:"user_id" form:"user_id" validate:"required"`
+	UserID  int `json:"user_id" form:"user_id"`
 	PlantID int `json:"plant_id" form:"plant_id" validate:"required"`
+}
+
+type PlantProgressInput struct {
+	PlantID  int    `form:"plant_id" validate:"required"`
+	UserID   int    `json:"user_id" form:"user_id"`
+	ImageURL string `form:"image_url"`
 }

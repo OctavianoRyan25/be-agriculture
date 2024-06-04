@@ -8,6 +8,7 @@ import (
 	"github.com/OctavianoRyan25/be-agriculture/modules/admin"
 	"github.com/OctavianoRyan25/be-agriculture/modules/plant"
 	"github.com/OctavianoRyan25/be-agriculture/modules/user"
+	"github.com/OctavianoRyan25/be-agriculture/modules/weather"
 	"github.com/OctavianoRyan25/be-agriculture/router"
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/labstack/echo/v4"
@@ -50,6 +51,14 @@ func main() {
 	plantCategoryService := plant.NewPlantCategoryService(plantCategoryRepository)
 	plantCategoryHandler := handler.NewPlantCategoryHandler(plantCategoryService, cloudinary)
 
+	plantProgressRepository := plant.NewPlantProgressRepository(db)
+	plantProgressService := plant.NewPlantProgressService(plantProgressRepository)
+	plantProgressHandler := handler.NewPlantProgressHandler(plantProgressService, cloudinary)
+
+	plantInstructionCategoryRepository := plant.NewPlantInstructionCategoryRepository(db)
+	plantInstructionCategoryService := plant.NewPlantInstructionCategoryService(plantInstructionCategoryRepository)
+	plantInstructionCategoryHandler := handler.NewPlantInstructionCategoryHandler(plantInstructionCategoryService, cloudinary)
+
 	plantRepository := plant.NewPlantRepository(db)
 	plantService := plant.NewPlantService(plantRepository, plantCategoryRepository)
 	plantHandler := handler.NewPlantHandler(plantService, cloudinary)
@@ -58,7 +67,10 @@ func main() {
 	plantUserService := plant.NewUserPlantService(plantUserRepository)
 	plantUserHandler := handler.NewUserPlantHandler(plantUserService)
 
-	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler)
+  weatherService := weather.NewWeatherService()
+  weatherHandler := handler.NewWeatherHandler(weatherService)
+
+	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
