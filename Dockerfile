@@ -5,6 +5,8 @@ WORKDIR /app
 
 COPY . .
 
+RUN apk add --no-cache tzdata
+
 RUN go mod download
 
 RUN go build -o /goapp
