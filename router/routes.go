@@ -19,7 +19,7 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	group.POST("/verify", userController.VerifyEmail)
 	group.POST("/login", userController.Login)
 	group.GET("/profile", userController.GetUserProfile, middlewares.Authentication())
-	group.GET("/resendotp", userController.ResendOTP)
+	group.POST("/resendotp", userController.ResendOTP)
 
 	groupAdmin := e.Group("/api/v1/admin")
 	groupAdmin.POST("/register", adminController.RegisterUser)
