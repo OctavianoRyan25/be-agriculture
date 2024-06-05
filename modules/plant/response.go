@@ -57,6 +57,7 @@ type PlantReminderResponse struct {
 type PlantInstructionResponse struct {
 	ID               			int       		`json:"id"`
 	PlantID          			int       		`json:"plant_id"`
+	InstructionCategory 	PlantInstructionCategoryResponse `json:"instruction_category"`
 	StepNumber       			int       		`json:"step_number"`
 	StepTitle        			string    		`json:"step_title"`
 	StepDescription  			string    		`json:"step_description"`
@@ -64,11 +65,26 @@ type PlantInstructionResponse struct {
 	AdditionalTips   			string    		`json:"additional_tips"`
 }
 
+type PlantInstructionCategoryResponse struct {
+	ID        						int       		`json:"id"`
+	Name      						string    		`json:"name"`
+	Description 					string    		`json:"description"`
+	ImageURL 							string    		`json:"image_url"`
+}
+
 type PlantFAQResponse struct {
 	ID         						int       		`json:"id"`
 	PlantID    						int       		`json:"plant_id"`
 	Question   						string    		`json:"question"`
 	Answer     						string    		`json:"answer"`
+	CreatedAt  						time.Time 		`json:"created_at"`
+}
+
+type PlantProgressResponse struct {
+	ID         					  int    				`json:"id"`
+	PlantID    					  int    				`json:"plant_id"`
+	UserID    					  int    				`json:"user_id"`
+	ImageURL    				  string    		`json:"image_url"`
 	CreatedAt  						time.Time 		`json:"created_at"`
 }
 
@@ -96,6 +112,25 @@ func NewPlantCategoryResponse(category PlantCategory) PlantCategoryClimateRespon
 	return PlantCategoryClimateResponse{
 		ID			 : category.ID,
 		Name		 : category.Name,
+		ImageURL : category.ImageURL,
+	}
+}
+
+func NewPlantProgressResponse(progress PlantProgress) PlantProgressResponse {
+	return PlantProgressResponse{
+		ID			 : progress.ID,
+		PlantID	 : progress.PlantID,
+		UserID	 : progress.UserID,
+		ImageURL : progress.ImageURL,
+		CreatedAt: progress.CreatedAt,
+	}
+}
+
+func NewPlantInstructionCategoryResponse(category PlantInstructionCategory) PlantInstructionCategoryResponse {
+	return PlantInstructionCategoryResponse{
+		ID			 : category.ID,
+		Name		 : category.Name,
+		Description: category.Description,
 		ImageURL : category.ImageURL,
 	}
 }
@@ -158,6 +193,7 @@ func NewPlantInstructionResponse(instruction PlantInstruction) PlantInstructionR
 	return PlantInstructionResponse{
 		ID							: instruction.ID,
 		PlantID					: instruction.PlantID,
+		InstructionCategory: NewPlantInstructionCategoryResponse(instruction.InstructionCategory),
 		StepNumber			: instruction.StepNumber,
 		StepTitle				: instruction.StepTitle,
 		StepDescription	: instruction.StepDescription,

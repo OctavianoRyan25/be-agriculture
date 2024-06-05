@@ -3,12 +3,18 @@ package plant
 import "gorm.io/gorm"
 
 type PlantRepository interface {
-	FindAll() ([]Plant, error)
+	FindAll(page, limit int) ([]Plant, error)
 	FindByID(id int) (Plant, error)
 	Create(plant Plant) (Plant, error)
 	Update(plant Plant) (Plant, error)
 	Delete(id int) error
 	FindByIDWithRelations(id int) (Plant, error)
+	CountAll(count *int64) error
+	SearchPlantsByName(name string, limit, offset int) ([]Plant, error)
+	CountPlantsByName(name string) (int64, error)
+	ClearPlantInstructions(plantID int) error
+	ClearPlantFAQs(plantID int) error
+	ClearPlantImages(plantID int) error
 }
 
 type plantRepository struct {
@@ -19,17 +25,27 @@ func NewPlantRepository(db *gorm.DB) PlantRepository {
 	return &plantRepository{db}
 }
 
-func (r *plantRepository) FindAll() ([]Plant, error) {
+func (r *plantRepository) FindAll(page, limit int) ([]Plant, error) {
 	var plants []Plant
-	err := r.db.Preload("PlantCategory").Preload("PlantCharacteristic").Preload("WateringSchedule").
-		Preload("PlantInstructions").Preload("PlantFAQs").Preload("PlantImages").Find(&plants).Error
+	var err error
+	if page > 0 && limit > 0 {
+			offset := (page - 1) * limit
+			err = r.db.Preload("PlantCategory").Preload("PlantCharacteristic").Preload("WateringSchedule").
+					Preload("PlantInstructions").Preload("PlantInstructions.InstructionCategory").Preload("PlantFAQs").Preload("PlantImages").
+					Offset(offset).Limit(limit).Find(&plants).Error
+	} else {
+			err = r.db.Preload("PlantCategory").Preload("PlantCharacteristic").Preload("WateringSchedule").
+					Preload("PlantInstructions").Preload("PlantInstructions.InstructionCategory").Preload("PlantFAQs").Preload("PlantImages").
+					Find(&plants).Error
+	}
 	return plants, err
 }
+
 
 func (r *plantRepository) FindByID(id int) (Plant, error) {
 	var plant Plant
 	err := r.db.Preload("PlantCategory").Preload("PlantCharacteristic").Preload("WateringSchedule").
-		Preload("PlantInstructions").Preload("PlantFAQs").Preload("PlantImages").First(&plant, id).Error
+		Preload("PlantInstructions").Preload("PlantInstructions.InstructionCategory").Preload("PlantFAQs").Preload("PlantImages").First(&plant, id).Error
 	return plant, err
 }
 
@@ -50,6 +66,7 @@ func (r *plantRepository) FindByIDWithRelations(id int) (Plant, error) {
 			Preload("PlantCharacteristic").
 			Preload("WateringSchedule").
 			Preload("PlantInstructions").
+			Preload("PlantInstructions.InstructionCategory").
 			Preload("PlantFAQs").
 			Preload("PlantImages").
 			Where("id = ?", id).
@@ -66,4 +83,45 @@ func (r *plantRepository) Delete(id int) error {
 	}
 	return nil
 }
+
+func (r *plantRepository) CountAll(count *int64) error {
+	return r.db.Model(&Plant{}).Count(count).Error
+}
+
+func (r *plantRepository) SearchPlantsByName(name string, limit, offset int) ([]Plant, error) {
+	var plants []Plant
+	err := r.db.Preload("PlantCategory").
+		Preload("PlantCharacteristic").
+		Preload("WateringSchedule").
+		Preload("PlantInstructions").
+		Preload("PlantInstructions.InstructionCategory").
+		Preload("PlantFAQs").
+		Preload("PlantImages").
+		Where("name LIKE ?", "%"+name+"%").
+		Limit(limit).
+		Offset(offset).
+		Find(&plants).Error
+	return plants, err
+}
+
+func (r *plantRepository) CountPlantsByName(name string) (int64, error) {
+	var count int64
+	err := r.db.Model(&Plant{}).
+		Where("name LIKE ?", "%"+name+"%").
+		Count(&count).Error
+	return count, err
+}
+
+func (r *plantRepository) ClearPlantInstructions(plantID int) error {
+	return r.db.Where("plant_id = ?", plantID).Delete(&PlantInstruction{}).Error
+}
+
+func (r *plantRepository) ClearPlantFAQs(plantID int) error {
+	return r.db.Where("plant_id = ?", plantID).Delete(&PlantFAQ{}).Error
+}
+
+func (r *plantRepository) ClearPlantImages(plantID int) error {
+	return r.db.Where("plant_id = ?", plantID).Delete(&PlantImage{}).Error
+}
+
 

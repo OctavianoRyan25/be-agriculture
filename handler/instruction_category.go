@@ -13,28 +13,28 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type PlantCategoryHandler struct {
-	service plant.PlantCategoryService
+type PlantInstructionCategoryHandler struct {
+	service plant.PlantInstructionCategoryService
 	cloudinary  *cloudinary.Cloudinary
 }
 
-func NewPlantCategoryHandler(service plant.PlantCategoryService, cloudinary  *cloudinary.Cloudinary) *PlantCategoryHandler {
-	return &PlantCategoryHandler{service , cloudinary}
+func NewPlantInstructionCategoryHandler(service plant.PlantInstructionCategoryService, cloudinary  *cloudinary.Cloudinary) *PlantInstructionCategoryHandler {
+	return &PlantInstructionCategoryHandler{service , cloudinary}
 }
 
-func (h *PlantCategoryHandler) GetAll(c echo.Context) error {
+func (h *PlantInstructionCategoryHandler) GetAll(c echo.Context) error {
 	categories, err := h.service.FindAll()
 	
 	if err != nil {
-		response := helper.APIResponse("Failed to get plant categories", http.StatusInternalServerError, "error", nil)
+		response := helper.APIResponse("Failed to get instruction categories", http.StatusInternalServerError, "error", nil)
 		return c.JSON(http.StatusInternalServerError, response)
 	}
 
-	response := helper.APIResponse("Plant categories fetched successfully", http.StatusOK, "success", categories)
+	response := helper.APIResponse("Instruction categories fetched successfully", http.StatusOK, "success", categories)
 	return c.JSON(http.StatusOK, response)
 }
 
-func (h *PlantCategoryHandler) GetByID(c echo.Context) error {
+func (h *PlantInstructionCategoryHandler) GetByID(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -44,16 +44,16 @@ func (h *PlantCategoryHandler) GetByID(c echo.Context) error {
 
 	category, err := h.service.FindByID(id)
 	if err != nil {
-		response := helper.APIResponse("Plant category not found", http.StatusNotFound, "error", nil)
+		response := helper.APIResponse("Instruction category not found", http.StatusNotFound, "error", nil)
 		return c.JSON(http.StatusNotFound, response)
 	}
 
-	response := helper.APIResponse("Plant category fetched successfully", http.StatusOK, "success", category)
+	response := helper.APIResponse("Instruction category fetched successfully", http.StatusOK, "success", category)
 	return c.JSON(http.StatusOK, response)
 }
 
-func (h *PlantCategoryHandler) Create(c echo.Context) error {
-	var input plant.PlantCategoryClimateInput
+func (h *PlantInstructionCategoryHandler) Create(c echo.Context) error {
+	var input plant.PlantInstructionCategoryInput
 
 	if err := c.Bind(&input); err != nil {
 		response := helper.APIResponse("Failed to bind input", http.StatusBadRequest, "error", nil)
@@ -101,15 +101,15 @@ func (h *PlantCategoryHandler) Create(c echo.Context) error {
 
 	_, err = h.service.Create(input, imageURL)
 	if err != nil {
-		response := helper.APIResponse("Failed to create plant category", http.StatusInternalServerError, "error", nil)
+		response := helper.APIResponse("Failed to create instruction category", http.StatusInternalServerError, "error", nil)
 		return c.JSON(http.StatusInternalServerError, response)
 	}
 
-	response := helper.APIResponse("Plant category created successfully", http.StatusCreated, "success", nil)
+	response := helper.APIResponse("Instruction category created successfully", http.StatusCreated, "success", nil)
 	return c.JSON(http.StatusCreated, response)
 }
 
-func (h *PlantCategoryHandler) Update(c echo.Context) error {
+func (h *PlantInstructionCategoryHandler) Update(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -123,7 +123,7 @@ func (h *PlantCategoryHandler) Update(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, response)
 	}
 
-	var input plant.PlantCategoryClimateInput
+	var input plant.PlantInstructionCategoryInput
 
 	if err := c.Bind(&input); err != nil {
 		response := helper.APIResponse("Failed to bind input", http.StatusBadRequest, "error", nil)
@@ -173,12 +173,12 @@ func (h *PlantCategoryHandler) Update(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, response)
 	}
 
-	response := helper.APIResponse("Plant category updated successfully", http.StatusOK, "success", category)
+	response := helper.APIResponse("Instruction category updated successfully", http.StatusOK, "success", category)
 	return c.JSON(http.StatusOK, response)
 }
 
 
-func (h *PlantCategoryHandler) Delete(c echo.Context) error {
+func (h *PlantInstructionCategoryHandler) Delete(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -194,17 +194,17 @@ func (h *PlantCategoryHandler) Delete(c echo.Context) error {
 
 	category, err := h.service.FindByID(id)
 	if err != nil {
-		response := helper.APIResponse("Plant category not found", http.StatusNotFound, "error", nil)
+		response := helper.APIResponse("Instruction category not found", http.StatusNotFound, "error", nil)
 		return c.JSON(http.StatusNotFound, response)
 	}
 
 	err = h.service.Delete(id)
 	if err != nil {
-		response := helper.APIResponse("Failed to delete plant category", http.StatusInternalServerError, "error", nil)
+		response := helper.APIResponse("Failed to delete instruction category", http.StatusInternalServerError, "error", nil)
 		return c.JSON(http.StatusInternalServerError, response)
 	}
 
-	response := helper.APIResponse("Plant category deleted successfully", http.StatusOK, "success", category)
+	response := helper.APIResponse("Instruction category deleted successfully", http.StatusOK, "success", category)
 	return c.JSON(http.StatusOK, response)
 }
 
