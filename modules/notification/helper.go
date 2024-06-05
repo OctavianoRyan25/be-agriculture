@@ -69,7 +69,8 @@ func StartScheduler(db *gorm.DB, useCase UseCase) {
 	c.AddFunc("@every 1m", func() {
 		fmt.Println("Checking for plants to water...")
 		var plantsToWater []plant.Plant
-		currentTime := time.Now()
+		location, _ := time.LoadLocation("Asia/Jakarta")
+		currentTime := time.Now().In(location)
 		formattedTime := currentTime.Format("HH:MM")
 
 		// Fetch all plants that need watering at the current time
