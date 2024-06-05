@@ -18,6 +18,7 @@ type UserUseCase interface {
 	VerifyEmail(string, string) (int, error)
 	Login(*User) (*User, int, error)
 	GetUserProfile(uint) (*User, int, error)
+	GetUser(string) (*User, int, error)
 }
 
 type userUseCase struct {
@@ -66,8 +67,10 @@ func (uc *userUseCase) SendEmailVerification(user *User) (int, error) {
 
 	OTP := user.OTP
 	username := user.Name
-
-	path := filepath.Join("modules", "user", "template", "base.html")
+	//Production
+	path := filepath.Join("/app", "modules", "user", "template", "base.html")
+	//Development
+	// path := filepath.Join("modules", "user", "template", "base.html")
 	template, err := template.ParseFiles(path)
 	if err != nil {
 		return constants.ErrCodeBadRequest, err
@@ -121,6 +124,14 @@ func (uc *userUseCase) Login(user *User) (*User, int, error) {
 
 func (uc *userUseCase) GetUserProfile(id uint) (*User, int, error) {
 	user, err := uc.repo.GetUserProfile(id)
+	if err != nil {
+		return nil, constants.ErrCodeBadRequest, err
+	}
+	return user, constants.CodeSuccess, nil
+}
+
+func (uc *userUseCase) GetUser(email string) (*User, int, error) {
+	user, err := uc.repo.GetUser(email)
 	if err != nil {
 		return nil, constants.ErrCodeBadRequest, err
 	}

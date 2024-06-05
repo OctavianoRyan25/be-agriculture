@@ -10,6 +10,7 @@ func MapUserRequestToUser(userRequest *UserRequest) *User {
 		Email:     userRequest.Email,
 		Password:  userRequest.Password,
 		Url_Image: userRequest.Url_Image,
+		FCMToken:  userRequest.FCMToken,
 	}
 }
 
@@ -21,6 +22,7 @@ func MapUserToResponse(user *User) *UserResponse {
 		Is_Active:  user.Is_Active,
 		OTP:        user.OTP,
 		Url_Image:  user.Url_Image,
+		FCMToken:   user.FCMToken,
 		Created_at: user.Created_at,
 	}
 }
