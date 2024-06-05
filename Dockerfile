@@ -16,6 +16,10 @@ FROM alpine:3.19 AS build-release-stage
 
 WORKDIR /
 
+# Copy tzdata from build stage to release stage
+COPY --from=build-stage /usr/share/zoneinfo /usr/share/zoneinfo
+ENV TZ=Asia/Jakarta
+
 COPY --from=build-stage /goapp /goapp
 COPY --from=build-stage /app/modules /app/modules
 
