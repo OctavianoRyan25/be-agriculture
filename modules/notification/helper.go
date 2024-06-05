@@ -66,11 +66,11 @@ func SendReminder(user user.User, plant plant.Plant, useCase UseCase) error {
 // Schedule watering reminders based on PlantReminder.WateringTime
 func StartScheduler(db *gorm.DB, useCase UseCase) {
 	c := cron.New()
-	c.AddFunc("@hourly", func() {
+	c.AddFunc("@every 1m", func() {
 		fmt.Println("Checking for plants to water...")
 		var plantsToWater []plant.Plant
 		currentTime := time.Now()
-		formattedTime := currentTime.Format("15:04")
+		formattedTime := currentTime.Format("HH:MM")
 
 		// Fetch all plants that need watering at the current time
 		err := db.
