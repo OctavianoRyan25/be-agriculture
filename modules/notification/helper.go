@@ -65,12 +65,16 @@ func SendReminder(user user.User, plant plant.Plant, useCase UseCase) error {
 
 // Schedule watering reminders based on PlantReminder.WateringTime
 func StartScheduler(db *gorm.DB, useCase UseCase) {
-	c := cron.New()
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		log.Fatalf("Error loading location: %v", err)
+	}
+
+	c := cron.New(cron.WithLocation(loc))
 	c.AddFunc("@every 1m", func() {
 		fmt.Println("Checking for plants to water...")
 		var plantsToWater []plant.Plant
-		location, _ := time.LoadLocation("Asia/Jakarta")
-		currentTime := time.Now().In(location)
+		currentTime := time.Now().In(loc)
 		formattedTime := currentTime.Format("HH:MM")
 
 		// Fetch all plants that need watering at the current time
