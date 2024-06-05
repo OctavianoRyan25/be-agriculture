@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/OctavianoRyan25/be-agriculture/configs"
 	"github.com/OctavianoRyan25/be-agriculture/handler"
 	"github.com/OctavianoRyan25/be-agriculture/modules/admin"
+	"github.com/OctavianoRyan25/be-agriculture/modules/notification"
 	"github.com/OctavianoRyan25/be-agriculture/modules/plant"
 	"github.com/OctavianoRyan25/be-agriculture/modules/search"
 	"github.com/OctavianoRyan25/be-agriculture/modules/user"
@@ -76,16 +78,25 @@ func main() {
 	searchUsecase := search.NewUsecase(searchRepository)
 	searchController := search.NewSearchController(searchUsecase)
 
-	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler, searchController)
+	// Initialize the notification repository and use case
+	notificationRepo := notification.NewRepository(db)
+	notificationUseCase := notification.NewUseCase(notificationRepo)
+	notificationController := notification.NewNotificationController(notificationUseCase)
+
+	// Initialize Firebase
+	//firebaseApp := notification.InitFirebase()
+
+	// Schedule watering reminders
+	notification.StartScheduler(db, notificationUseCase)
+
+	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler, searchController, notificationController)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
 
 func initCloudinary() (*cloudinary.Cloudinary, error) {
 	//Production
-	//cloudinaryURL := os.Getenv("CLOUDINARY_URL")
-	//Development
-	cloudinaryURL := "cloudinary://985586974845469:PGaIo6o1qfPg54_o_zA4poyj49o@dxrz0cg5z"
+	cloudinaryURL := os.Getenv("CLOUDINARY_URL")
 	cloudinary, err := cloudinary.NewFromURL(cloudinaryURL)
 	if err != nil {
 		return nil, err

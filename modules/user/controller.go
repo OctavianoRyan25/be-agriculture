@@ -245,3 +245,40 @@ func (c *UserController) GetUserProfile(ctx echo.Context) error {
 
 	return ctx.JSON(code, res)
 }
+
+func (c *UserController) ResendOTP(ctx echo.Context) error {
+	req := new(CheckEmailRequest)
+	err := ctx.Bind(&req)
+	if err != nil {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: err.Error(),
+			Code:    http.StatusUnprocessableEntity,
+		}
+		return ctx.JSON(http.StatusUnprocessableEntity, errRes)
+	}
+	user, code, err := c.userUseCase.GetUser(req.Email)
+	if err != nil {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: err.Error(),
+			Code:    code,
+		}
+		return ctx.JSON(code, errRes)
+	}
+	res, err := c.userUseCase.SendEmailVerification(user)
+	if err != nil {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: err.Error(),
+			Code:    code,
+		}
+		return ctx.JSON(code, errRes)
+	}
+	resSuccess := base.SuccessResponse{
+		Status:  "success",
+		Message: "OTP sent",
+		Data:    res,
+	}
+	return ctx.JSON(code, resSuccess)
+}

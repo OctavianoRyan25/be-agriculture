@@ -46,5 +46,10 @@ func (c *SearchController) Search(ctx echo.Context) error {
 		}
 		return ctx.JSON(http.StatusOK, res)
 	}
-	return ctx.JSON(http.StatusOK, plants)
+	res := base.SuccessResponse{
+		Status:  "success",
+		Message: "Data found",
+		Data:    plants,
+	}
+	return ctx.JSON(http.StatusOK, res)
 }

@@ -2,6 +2,7 @@ package weather
 
 import (
 	"encoding/json"
+	"os"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -22,9 +23,7 @@ func NewWeatherService() WeatherService {
 func (s *weatherService) GetCurrentWeather(city string) (*Weather, error) {
 	client := resty.New()
 	//Production
-	// apiKey := os.Getenv("OPENWEATHER_API_KEY")
-	//Development
-	apiKey := "ee65071ba7eed756234c9708e19289b8"
+	apiKey := os.Getenv("OPENWEATHER_API_KEY")
 	resp, err := client.R().
 		SetQueryParams(map[string]string{
 			"q":     city,
@@ -68,9 +67,8 @@ func (s *weatherService) GetCurrentWeather(city string) (*Weather, error) {
 func (s *weatherService) GetHourlyWeather(city string) ([]HourlyWeather, error) {
 	client := resty.New()
 	//Production
-	// apiKey := os.Getenv("OPENWEATHER_API_KEY")
-	//Development
-	apiKey := "ee65071ba7eed756234c9708e19289b8"
+	apiKey := os.Getenv("OPENWEATHER_API_KEY")
+
 	resp, err := client.R().
 		SetQueryParams(map[string]string{
 			"q":     city,
@@ -120,9 +118,7 @@ func (s *weatherService) GetHourlyWeather(city string) ([]HourlyWeather, error) 
 func (s *weatherService) GetDailyWeather(city string) ([]DailyWeather, error) {
 	client := resty.New()
 	//Production
-	// apiKey := os.Getenv("OPENWEATHER_API_KEY")
-	//Development
-	apiKey := "ee65071ba7eed756234c9708e19289b8"
+	apiKey := os.Getenv("OPENWEATHER_API_KEY")
 	resp, err := client.R().
 		SetQueryParams(map[string]string{
 			"q":     city,

@@ -6,18 +6,20 @@ import (
 	"github.com/OctavianoRyan25/be-agriculture/handler"
 	"github.com/OctavianoRyan25/be-agriculture/middlewares"
 	"github.com/OctavianoRyan25/be-agriculture/modules/admin"
+	"github.com/OctavianoRyan25/be-agriculture/modules/notification"
 	"github.com/OctavianoRyan25/be-agriculture/modules/search"
 	"github.com/OctavianoRyan25/be-agriculture/modules/user"
 	"github.com/labstack/echo/v4"
 )
 
-func InitRoutes(e *echo.Echo, userController *user.UserController, adminController *admin.AdminController, plantCategoryHandler *handler.PlantCategoryHandler, plantHandler *handler.PlantHandler, plantUserHandler *handler.UserPlantHandler, weatherHandler *handler.WeatherHandler, plantInstructionCategoryHandler *handler.PlantInstructionCategoryHandler, plantProgressHandler *handler.PlantProgressHandler, search *search.SearchController) {
+func InitRoutes(e *echo.Echo, userController *user.UserController, adminController *admin.AdminController, plantCategoryHandler *handler.PlantCategoryHandler, plantHandler *handler.PlantHandler, plantUserHandler *handler.UserPlantHandler, weatherHandler *handler.WeatherHandler, plantInstructionCategoryHandler *handler.PlantInstructionCategoryHandler, plantProgressHandler *handler.PlantProgressHandler, search *search.SearchController, notification *notification.NotificationController) {
 	group := e.Group("/api/v1")
 	group.POST("/register", userController.RegisterUser)
 	group.POST("/check-email", userController.CheckEmail)
 	group.POST("/verify", userController.VerifyEmail)
 	group.POST("/login", userController.Login)
 	group.GET("/profile", userController.GetUserProfile, middlewares.Authentication())
+	group.GET("/resend-otp", userController.ResendOTP)
 
 	groupAdmin := e.Group("/api/v1/admin")
 	groupAdmin.POST("/register", adminController.RegisterUser)
@@ -53,6 +55,10 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	group.GET("/weather/current/:city", weatherHandler.GetCurrentWeather, middlewares.Authentication())
 	group.GET("/weather/hourly/:city", weatherHandler.GetHourlyWeather, middlewares.Authentication())
 	group.GET("/weather/daily/:city", weatherHandler.GetDailyWeather, middlewares.Authentication())
+
+	group.GET("/notifications/:id", notification.ReadNotification, middlewares.Authentication())
+	group.GET("/notifications", notification.GetAllNotifications, middlewares.Authentication())
+	group.DELETE("/notifications", notification.DeleteAllNotifications, middlewares.Authentication())
 
 	group.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")

@@ -1,80 +1,116 @@
 package notification
 
-// import (
-// 	"context"
-// 	"fmt"
-// 	"log"
-// 	"time"
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
 
-// 	firebase "firebase.google.com/go/v4"
-// 	"firebase.google.com/go/v4/messaging"
-// 	"github.com/OctavianoRyan25/be-agriculture/modules/plant"
-// 	"github.com/OctavianoRyan25/be-agriculture/modules/user"
-// 	"github.com/robfig/cron"
-// 	"google.golang.org/api/option"
-// 	"gorm.io/gorm"
-// )
+	firebase "firebase.google.com/go/v4"
+	"github.com/OctavianoRyan25/be-agriculture/modules/plant"
+	"github.com/OctavianoRyan25/be-agriculture/modules/user" // Updated import
+	"github.com/robfig/cron/v3"
+	"google.golang.org/api/option"
+	"gorm.io/gorm"
+)
 
-// // Initialize Firebase app
-// func InitFirebase() *firebase.App {
-// 	opt := option.WithCredentialsFile("path/to/your-firebase-adminsdk.json")
-// 	app, err := firebase.NewApp(context.Background(), nil, opt)
-// 	if err != nil {
-// 		log.Fatalf("error initializing app: %v", err)
-// 	}
-// 	return app
-// }
+// Initialize Firebase app
+func InitFirebase() *firebase.App {
+	opt := option.WithCredentialsFile("path/to/your-firebase-adminsdk.json")
+	app, err := firebase.NewApp(context.Background(), nil, opt)
+	if err != nil {
+		log.Fatalf("error initializing app: %v", err)
+	}
+	return app
+}
 
-// // Send reminder notification using FCM
-// func SendReminder(user user.User, plant plant.Plant, client *messaging.Client) {
-// 	message := &messaging.Message{
-// 		Token: user.FCMToken,
-// 		Notification: &messaging.Notification{
-// 			Title: "Watering Reminder",
-// 			Body:  fmt.Sprintf("It's time to water your plant: %s", plant.Name),
-// 		},
-// 	}
+// Send reminder notification and store it in the database
+func SendReminder(user user.User, plant plant.Plant, useCase UseCase) error {
+	// Simulating FCM messaging part is commented out
+	/*
+		message := &messaging.Message{
+			Token: user.FCMToken,
+			Notification: &messaging.Notification{
+				Title: "Watering Reminder",
+				Body:  fmt.Sprintf("It's time to water your plant: %s", plant.Name),
+			},
+		}
 
-// 	_, err := client.Send(context.Background(), message)
-// 	if err != nil {
-// 		log.Printf("Error sending FCM message: %v", err)
-// 	} else {
-// 		fmt.Printf("Reminder sent to %s for watering plant %s\n", user.Email, plant.Name)
-// 	}
-// }
+		_, err := client.Send(context.Background(), message)
+		if err != nil {
+			log.Printf("Error sending FCM message: %v", err)
+		} else {
+			fmt.Printf("Reminder sent to %s for watering plant %s\n", user.Email, plant.Name)
+		}
+	*/
 
-// // Schedule watering reminders based on PlantReminder.WateringTime
-// func ScheduleWateringReminders(c *cron.Cron, db *gorm.DB, firebaseApp *firebase.App) {
-// 	var userPlants []plant.UserPlant
-// 	err := db.Preload("Plant.WateringSchedule").Preload("User").Find(&userPlants).Error
-// 	if err != nil {
-// 		log.Fatalf("Failed to fetch user plants: %v", err)
-// 	}
+	// Store the notification in the database
+	notification := &Notification{
+		Title:     "Watering Reminder",
+		Body:      fmt.Sprintf("It's time to water your plant: %s", plant.Name),
+		UserId:    user.ID,
+		IsRead:    false,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
 
-// 	client, err := firebaseApp.Messaging(context.Background())
-// 	if err != nil {
-// 		log.Fatalf("error getting Messaging client: %v", err)
-// 	}
+	_, err := useCase.StoreNotification(notification)
+	if err != nil {
+		log.Printf("Error storing notification: %v", err)
+		return err
+	}
+	fmt.Printf("Notification stored for user %s\n", user.Email)
+	return nil
+}
 
-// 	for _, userPlant := range userPlants {
-// 		plant := userPlant.Plant
-// 		wateringSchedule := plant.WateringSchedule
-// 		user := userPlant.User
+// Schedule watering reminders based on PlantReminder.WateringTime
+func StartScheduler(db *gorm.DB, useCase UseCase) {
+	c := cron.New()
+	c.AddFunc("@hourly", func() {
+		fmt.Println("Checking for plants to water...")
+		var plantsToWater []plant.Plant
+		currentTime := time.Now()
+		formattedTime := currentTime.Format("15:04")
 
-// 		// Parse the WateringTime to schedule the reminder
-// 		wateringTime := wateringSchedule.WateringTime
-// 		parsedTime, err := time.Parse("15:04", wateringTime)
-// 		if err != nil {
-// 			log.Printf("Invalid watering time format for plant %s: %v", plant.Name, err)
-// 			continue
-// 		}
+		// Fetch all plants that need watering at the current time
+		err := db.
+			Preload("WateringSchedule").
+			Joins("JOIN plant_reminders ON plant_reminders.plant_id = plants.id").
+			Where("plant_reminders.watering_time = ?", formattedTime).
+			Find(&plantsToWater).Error
+		if err != nil {
+			fmt.Printf("Failed to fetch plants to water: %v\n", err)
+			return
+		}
 
-// 		// Create cron schedule based on parsed time
-// 		cronSchedule := fmt.Sprintf("%d %d * * *", parsedTime.Minute(), parsedTime.Hour())
-// 		c.AddFunc(cronSchedule, func() {
-// 			SendReminder(user, plant, client)
-// 		})
+		// Check if any plants need watering
+		if len(plantsToWater) == 0 {
+			fmt.Println("No plants found for watering at this time.")
+			return
+		}
 
-// 		fmt.Printf("Scheduled reminder for plant %s at %s\n", plant.Name, cronSchedule)
-// 	}
-// }
+		// Iterate over each plant to water
+		for _, plantToWater := range plantsToWater {
+			var usersWithPlant []user.User
+
+			// Find users who have this plant
+			err := db.Model(&user.User{}).
+				Joins("JOIN user_plants ON users.id = user_plants.user_id").
+				Where("user_plants.plant_id = ?", plantToWater.ID).
+				Find(&usersWithPlant).Error
+			if err != nil {
+				fmt.Printf("Failed to fetch users with plant %s: %v\n", plantToWater.Name, err)
+				continue
+			}
+
+			// Notify each user
+			for _, user := range usersWithPlant {
+				err := SendReminder(user, plantToWater, useCase)
+				if err != nil {
+					fmt.Printf("Error sending reminder to user %s: %v\n", user.Email, err)
+				}
+			}
+		}
+	})
+	c.Start()
+}

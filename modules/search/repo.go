@@ -32,14 +32,18 @@ func (r *searchRepo) Search(params PlantSearchParams) ([]plant.Plant, error) {
 	if params.PlantCategory != "" {
 		query = query.Where("plant_category_id = ?", params.PlantCategory)
 	}
-	if params.DifficultyLevel != "" {
-		query = query.Where("difficulty_level = ?", params.DifficultyLevel)
-	}
 	if params.Sunlight != "" {
 		query = query.Where("sunlight = ?", params.Sunlight)
 	}
 	if params.HarvestDuration != "" {
-		query = query.Where("harvest_duration = ?", params.HarvestDuration)
+		switch params.HarvestDuration {
+		case "less than 30 days":
+			query = query.Where("harvest_duration < ?", 30)
+		case "30-90 days":
+			query = query.Where("harvest_duration >= ? AND harvest_duration <= ?", 30, 90)
+		case "greater than 90 days":
+			query = query.Where("harvest_duration > ?", 90)
+		}
 	}
 	if params.IsToxic != nil {
 		query = query.Where("is_toxic = ?", params.IsToxic)
