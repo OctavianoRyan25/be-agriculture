@@ -8,6 +8,7 @@ import (
 	"github.com/OctavianoRyan25/be-agriculture/modules/admin"
 	"github.com/OctavianoRyan25/be-agriculture/modules/notification"
 	"github.com/OctavianoRyan25/be-agriculture/modules/search"
+	"github.com/OctavianoRyan25/be-agriculture/modules/fertilizer"
 	"github.com/OctavianoRyan25/be-agriculture/modules/user"
 	"github.com/labstack/echo/v4"
 )
@@ -59,6 +60,13 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	group.GET("/notifications/:id", notification.ReadNotification, middlewares.Authentication())
 	group.GET("/notifications", notification.GetAllNotifications, middlewares.Authentication())
 	group.DELETE("/notifications", notification.DeleteAllNotifications, middlewares.Authentication())
+
+	groupFertilizer := e.Group("/api/v1")
+	groupFertilizer.GET("/fertilizer", fertilizer.GetFertilizer)
+	groupFertilizer.GET("/fertilizer/:Id", fertilizer.GetFertilizerById)
+	groupFertilizer.POST("/fertilizer", fertilizer.CreateFertilizer, middlewares.Authentication())
+	groupFertilizer.PUT("/fertilizer/:Id", fertilizer.UpdateFertilizer, middlewares.Authentication())
+	groupFertilizer.DELETE("/fertilizer/:Id", fertilizer.DeleteFertilizer, middlewares.Authentication())
 
 	group.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
