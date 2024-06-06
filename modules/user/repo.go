@@ -15,6 +15,7 @@ type Repository interface {
 	IsValidated(string) (bool, error)
 	Login(*User) (*User, error)
 	GetUserProfile(uint) (*User, error)
+	GetUser(string) (*User, error)
 }
 
 type userRepository struct {
@@ -92,6 +93,15 @@ func (r *userRepository) Login(user *User) (*User, error) {
 func (r *userRepository) GetUserProfile(id uint) (*User, error) {
 	var user User
 	err := r.db.Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *userRepository) GetUser(email string) (*User, error) {
+	var user User
+	err := r.db.Where("email = ?", email).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
