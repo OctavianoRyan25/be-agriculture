@@ -73,7 +73,7 @@ func StartScheduler(db *gorm.DB, useCase UseCase) {
 	}
 
 	c := cron.New()
-	c.AddFunc("@every 1m", func() {
+	c.AddFunc("@hourly", func() {
 		fmt.Println("Checking for plants to water...")
 		var plantsToWater []plant.Plant
 		currentTime := time.Now().In(location)
