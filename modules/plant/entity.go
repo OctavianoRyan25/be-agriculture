@@ -21,6 +21,7 @@ type Plant struct {
 	PlantCharacteristic   PlantCharacteristic `json:"plant_characteristic" gorm:"foreignKey:PlantID;constraint:OnDelete:CASCADE"`
 	WateringSchedule  	 PlantReminder  		`json:"watering_schedule" gorm:"foreignKey:PlantID;constraint:OnDelete:CASCADE"`
   PlantInstructions 	 []PlantInstruction `json:"plant_instructions" gorm:"foreignKey:PlantID;constraint:OnDelete:CASCADE"`
+	AdditionalTips  		 string 						`json:"additional_tips"`
   PlantFAQs         	 []PlantFAQ         `json:"plant_faqs" gorm:"foreignKey:PlantID;constraint:OnDelete:CASCADE"`
   PlantImages       	 []PlantImage       `json:"plant_images" gorm:"foreignKey:PlantID;constraint:OnDelete:CASCADE"`
 	CreatedAt         	 time.Time          `json:"created_at"`
@@ -78,7 +79,6 @@ type PlantInstruction struct {
 	StepTitle       		 string 						`json:"step_title"`
 	StepDescription 		 string 						`json:"step_description"`
 	StepImageURL    		 string 						`json:"step_image_url"`
-	AdditionalTips  		 string 						`json:"additional_tips"`
 	CreatedAt         	 time.Time          `json:"created_at"`
 	UpdatedAt         	 time.Time          `json:"updated_at"`
 }

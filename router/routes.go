@@ -40,7 +40,9 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 
 	group.GET("/plants", plantHandler.GetAll)            
 	group.GET("/plants/:id", plantHandler.GetByID)        
-	group.GET("/plants/search", plantHandler.SearchPlantsByName)        
+	group.GET("/plants/search", plantHandler.SearchPlantsByName)
+	group.GET("/plants/category/:category_id", plantHandler.GetPlantsByCategoryID)
+	group.GET("/plants/recommendations", plantHandler.GetRecommendations, middlewares.Authentication())        
 	groupAdmin.POST("/plants", plantHandler.Create, middlewares.Authentication())           
 	groupAdmin.PUT("/plants/:id", plantHandler.Update, middlewares.Authentication())         
 	groupAdmin.DELETE("/plants/:id", plantHandler.Delete, middlewares.Authentication())
@@ -49,9 +51,9 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	group.POST("/my/plants/add", plantUserHandler.AddUserPlant, middlewares.Authentication())
 	group.DELETE("/my/plants/:user_plant_id", plantUserHandler.DeleteUserPlantByID, middlewares.Authentication())
 
-	group.GET("/weather/current/:city", weatherHandler.GetCurrentWeather, middlewares.Authentication())
-  group.GET("/weather/hourly/:city", weatherHandler.GetHourlyWeather, middlewares.Authentication())
-  group.GET("/weather/daily/:city", weatherHandler.GetDailyWeather, middlewares.Authentication())
+	group.GET("/weather/current", weatherHandler.GetCurrentWeather, middlewares.Authentication())
+  group.GET("/weather/hourly", weatherHandler.GetHourlyWeather, middlewares.Authentication())
+  group.GET("/weather/daily", weatherHandler.GetDailyWeather, middlewares.Authentication())
 
 	group.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
