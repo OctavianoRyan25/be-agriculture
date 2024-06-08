@@ -67,6 +67,7 @@ resp, err := client.R().
 
 func (s *weatherService) GetHourlyWeatherByCoordinates(lat, lon float64) ([]HourlyWeather, error) {
 	client := resty.New()
+	//Production
 	apiKey := os.Getenv("OPENWEATHER_API_KEY")
 	resp, err := client.R().
 			SetQueryParams(map[string]string{
@@ -78,7 +79,7 @@ func (s *weatherService) GetHourlyWeatherByCoordinates(lat, lon float64) ([]Hour
 			Get("http://api.openweathermap.org/data/2.5/forecast")
 
 	if err != nil {
-			return nil, err
+		return nil, err
 	}
 
 	var apiResponse map[string]interface{}
@@ -117,7 +118,9 @@ func (s *weatherService) GetHourlyWeatherByCoordinates(lat, lon float64) ([]Hour
 
 func (s *weatherService) GetDailyWeatherByCoordinates(lat, lon float64) ([]DailyWeather, error) {
 	client := resty.New()
+	//Production
 	apiKey := os.Getenv("OPENWEATHER_API_KEY")
+
 	resp, err := client.R().
         SetQueryParams(map[string]string{
             "lat":   fmt.Sprintf("%f", lat),
@@ -132,17 +135,17 @@ func (s *weatherService) GetDailyWeatherByCoordinates(lat, lon float64) ([]Daily
         return nil, err
     }
 
-    var apiResponse map[string]interface{}
-    if err := json.Unmarshal(resp.Body(), &apiResponse); err != nil {
-        return nil, err
-    }
+	var apiResponse map[string]interface{}
+	if err := json.Unmarshal(resp.Body(), &apiResponse); err != nil {
+		return nil, err
+	}
 
     if cod, ok := apiResponse["cod"].(string); ok && cod != "200" {
         return nil, fmt.Errorf("API returned non-200 status code: %s", cod)
     }
 
-    list := apiResponse["list"].([]interface{})
-    var dailyWeathers []DailyWeather
+	list := apiResponse["list"].([]interface{})
+	var dailyWeathers []DailyWeather
 
     for i, item := range list {
         forecastItem := item.(map[string]interface{})
@@ -175,8 +178,8 @@ func (s *weatherService) GetDailyWeatherByCoordinates(lat, lon float64) ([]Daily
             Icon:        weatherDesc["icon"].(string),
         }
 
-        dailyWeathers = append(dailyWeathers, dailyWeather)
-    }
+		dailyWeathers = append(dailyWeathers, dailyWeather)
+	}
 
     return dailyWeathers, nil
 }

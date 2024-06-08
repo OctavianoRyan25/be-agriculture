@@ -10,6 +10,7 @@ type UserRequest struct {
 	Password   string    `json:"password" validate:"required"`
 	Is_Active  bool      `json:"is_active"`
 	Url_Image  string    `json:"url_image"`
+	FCMToken   string    `json:"fcm_token" validate:"required"`
 	Created_at time.Time `json:"created_at"`
 	Updated_at time.Time `json:"updated_at"`
 }

@@ -16,6 +16,7 @@ func InitDB() (*gorm.DB, error) {
 	dbPort := os.Getenv("DB_PORT")
 	dbName := os.Getenv("DB_NAME")
 
+	//Development
 	// dbUser := "root"
 	// dbPass := ""
 	// dbHost := "localhost"
