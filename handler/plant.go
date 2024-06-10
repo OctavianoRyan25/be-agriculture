@@ -23,6 +23,56 @@ func NewPlantHandler(service plant.PlantService, 	cloudinary  *cloudinary.Cloudi
 	return &PlantHandler{service, cloudinary}
 }
 
+func (h *PlantHandler) GetRecommendations(c echo.Context) error {
+	userID, ok := c.Get("user_id").(uint)
+	if !ok {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			return c.JSON(http.StatusUnauthorized, response)
+	}
+
+	plants, err := h.service.GetRecommendations(int(userID))
+	if err != nil {
+			response := helper.APIResponse("Failed to fetch recommendations", http.StatusInternalServerError, "error", nil)
+			return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	response := helper.APIResponse("Recommendations fetched successfully", http.StatusOK, "success", plants)
+	return c.JSON(http.StatusOK, response)
+}
+
+func (h *PlantHandler) GetPlantsByCategoryID(c echo.Context) error {
+	categoryID, err := strconv.Atoi(c.Param("category_id"))
+	if err != nil {
+			response := helper.APIResponse("Invalid category ID", http.StatusBadRequest, "error", nil)
+			return c.JSON(http.StatusBadRequest, response)
+	}
+
+	exists, err := h.service.CategoryExists(categoryID)
+	if err != nil {
+			response := helper.APIResponse("Failed to check category existence", http.StatusInternalServerError, "error", nil)
+			return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	if !exists {
+			response := helper.APIResponse("Category not found", http.StatusNotFound, "error", nil)
+			return c.JSON(http.StatusNotFound, response)
+	}
+
+	plants, err := h.service.FindByCategoryID(categoryID)
+	if err != nil {
+			response := helper.APIResponse("Failed to fetch plants by category", http.StatusInternalServerError, "error", nil)
+			return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	if len(plants) == 0 {
+			response := helper.APIResponse("No plants found for this category", http.StatusNotFound, "error", nil)
+			return c.JSON(http.StatusNotFound, response)
+	}
+
+	response := helper.APIResponse("Plants fetched successfully by category", http.StatusOK, "success", plants)
+	return c.JSON(http.StatusOK, response)
+}
+
 func (h *PlantHandler) GetAll(c echo.Context) error {
 	page, err := strconv.Atoi(c.QueryParam("page"))
 	if err != nil || page <= 0 {
@@ -77,7 +127,6 @@ func (h *PlantHandler) GetAll(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-
 func (h *PlantHandler) GetByID(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -117,6 +166,7 @@ func (h *PlantHandler) Create(c echo.Context) error {
 	input.PlantingTime = form.Value["planting_time"][0]
 	input.PlantCategoryID, _ = strconv.Atoi(form.Value["plant_category_id"][0])
 	input.ClimateCondition = form.Value["climate_condition"][0]
+	input.AdditionalTips = form.Value["additional_tips"][0]
 
 	// Parsing plant characteristic
 	input.PlantCharacteristic = plant.CreatePlantCharacteristicInput{
@@ -147,7 +197,6 @@ func (h *PlantHandler) Create(c echo.Context) error {
 			StepTitle:       form.Value["plant_instructions.step_title"][i],
 			StepDescription: form.Value["plant_instructions.step_description"][i],
 			StepImageURL:    "",
-			AdditionalTips:  form.Value["plant_instructions.additional_tips"][i],
 		}
 
 		// Handle file upload for step_image_url
@@ -252,6 +301,7 @@ func (h *PlantHandler) Update(c echo.Context) error {
 	input.PlantingTime = form.Value["planting_time"][0]
 	input.PlantCategoryID, _ = strconv.Atoi(form.Value["plant_category_id"][0])
 	input.ClimateCondition = form.Value["climate_condition"][0]
+	input.AdditionalTips = form.Value["additional_tips"][0]
 
 	// Parsing plant characteristic
 	input.PlantCharacteristic = plant.CreatePlantCharacteristicInput{
@@ -282,7 +332,6 @@ func (h *PlantHandler) Update(c echo.Context) error {
 			StepTitle:       form.Value["plant_instructions.step_title"][i],
 			StepDescription: form.Value["plant_instructions.step_description"][i],
 			StepImageURL:    "",
-			AdditionalTips:  form.Value["plant_instructions.additional_tips"][i],
 		}
 
 		// Handle file upload for step_image_url

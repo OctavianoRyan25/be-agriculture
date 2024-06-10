@@ -6,20 +6,22 @@ import (
 	"github.com/OctavianoRyan25/be-agriculture/handler"
 	"github.com/OctavianoRyan25/be-agriculture/middlewares"
 	"github.com/OctavianoRyan25/be-agriculture/modules/admin"
+	"github.com/OctavianoRyan25/be-agriculture/modules/fertilizer"
 	"github.com/OctavianoRyan25/be-agriculture/modules/notification"
 	"github.com/OctavianoRyan25/be-agriculture/modules/search"
 	"github.com/OctavianoRyan25/be-agriculture/modules/user"
+	wateringhistory "github.com/OctavianoRyan25/be-agriculture/modules/watering_history"
 	"github.com/labstack/echo/v4"
 )
 
-func InitRoutes(e *echo.Echo, userController *user.UserController, adminController *admin.AdminController, plantCategoryHandler *handler.PlantCategoryHandler, plantHandler *handler.PlantHandler, plantUserHandler *handler.UserPlantHandler, weatherHandler *handler.WeatherHandler, plantInstructionCategoryHandler *handler.PlantInstructionCategoryHandler, plantProgressHandler *handler.PlantProgressHandler, search *search.SearchController, notification *notification.NotificationController) {
+func InitRoutes(e *echo.Echo, userController *user.UserController, adminController *admin.AdminController, plantCategoryHandler *handler.PlantCategoryHandler, plantHandler *handler.PlantHandler, plantUserHandler *handler.UserPlantHandler, weatherHandler *handler.WeatherHandler, plantInstructionCategoryHandler *handler.PlantInstructionCategoryHandler, plantProgressHandler *handler.PlantProgressHandler, search *search.SearchController, notification *notification.NotificationController, wateringhistory *wateringhistory.WateringHistoryController) {
 	group := e.Group("/api/v1")
 	group.POST("/register", userController.RegisterUser)
 	group.POST("/check-email", userController.CheckEmail)
 	group.POST("/verify", userController.VerifyEmail)
 	group.POST("/login", userController.Login)
 	group.GET("/profile", userController.GetUserProfile, middlewares.Authentication())
-	group.GET("/resend-otp", userController.ResendOTP)
+	group.POST("/resendotp", userController.ResendOTP)
 
 	groupAdmin := e.Group("/api/v1/admin")
 	groupAdmin.POST("/register", adminController.RegisterUser)
@@ -41,24 +43,37 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	groupAdmin.PUT("/plants/instructions/categories/:id", plantInstructionCategoryHandler.Update, middlewares.Authentication())
 	groupAdmin.DELETE("/plants/instructions/categories/:id", plantInstructionCategoryHandler.Delete, middlewares.Authentication())
 
-	group.GET("/plants", plantHandler.GetAll)
-	group.GET("/plants/:id", plantHandler.GetByID)
+	group.GET("/plants", plantHandler.GetAll)            
+	group.GET("/plants/:id", plantHandler.GetByID)        
 	group.GET("/plants/search", plantHandler.SearchPlantsByName)
-	groupAdmin.POST("/plants", plantHandler.Create, middlewares.Authentication())
-	groupAdmin.PUT("/plants/:id", plantHandler.Update, middlewares.Authentication())
+	group.GET("/plants/category/:category_id", plantHandler.GetPlantsByCategoryID)
+	group.GET("/plants/recommendations", plantHandler.GetRecommendations, middlewares.Authentication())        
+	groupAdmin.POST("/plants", plantHandler.Create, middlewares.Authentication())           
+	groupAdmin.PUT("/plants/:id", plantHandler.Update, middlewares.Authentication())         
 	groupAdmin.DELETE("/plants/:id", plantHandler.Delete, middlewares.Authentication())
 
 	group.GET("/my/plants/:user_id", plantUserHandler.GetUserPlants, middlewares.Authentication())
 	group.POST("/my/plants/add", plantUserHandler.AddUserPlant, middlewares.Authentication())
 	group.DELETE("/my/plants/:user_plant_id", plantUserHandler.DeleteUserPlantByID, middlewares.Authentication())
 
-	group.GET("/weather/current/:city", weatherHandler.GetCurrentWeather, middlewares.Authentication())
-	group.GET("/weather/hourly/:city", weatherHandler.GetHourlyWeather, middlewares.Authentication())
-	group.GET("/weather/daily/:city", weatherHandler.GetDailyWeather, middlewares.Authentication())
+	group.GET("/weather/current", weatherHandler.GetCurrentWeather, middlewares.Authentication())
+  group.GET("/weather/hourly", weatherHandler.GetHourlyWeather, middlewares.Authentication())
+  group.GET("/weather/daily", weatherHandler.GetDailyWeather, middlewares.Authentication())
 
 	group.GET("/notifications/:id", notification.ReadNotification, middlewares.Authentication())
 	group.GET("/notifications", notification.GetAllNotifications, middlewares.Authentication())
 	group.DELETE("/notifications", notification.DeleteAllNotifications, middlewares.Authentication())
+
+	groupFertilizer := e.Group("/api/v1")
+	groupFertilizer.GET("/fertilizer", fertilizer.GetFertilizer)
+	groupFertilizer.GET("/fertilizer/:Id", fertilizer.GetFertilizerById)
+	groupFertilizer.POST("/fertilizer", fertilizer.CreateFertilizer, middlewares.Authentication())
+	groupFertilizer.PUT("/fertilizer/:Id", fertilizer.UpdateFertilizer, middlewares.Authentication())
+	groupFertilizer.DELETE("/fertilizer/:Id", fertilizer.DeleteFertilizer, middlewares.Authentication())
+
+	group.POST("/create-customize-watering-reminder", notification.CreateCustomizeWateringReminder, middlewares.Authentication())
+	group.POST("/watering-history", wateringhistory.StoreWateringHistory, middlewares.Authentication())
+	group.GET("/watering-history", wateringhistory.GetAllWateringHistories, middlewares.Authentication())
 
 	group.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")

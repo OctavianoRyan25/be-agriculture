@@ -23,6 +23,7 @@ type CreatePlantInput struct {
 	PlantCharacteristic CreatePlantCharacteristicInput `form:"plant_characteristic" validate:"required"`
 	WateringSchedule    CreateWateringScheduleInput    `form:"watering_schedule"`
 	PlantInstructions   []CreatePlantInstructionInput  `form:"plant_instructions"`
+	AdditionalTips      string                         `form:"additional_tips"`
 	PlantFAQs           []CreatePlantFAQInput          `form:"plant_faqs"`
 	PlantImages         []CreatePlantImageInput        `form:"plant_images" validate:"required,dive"`
 }
@@ -39,6 +40,7 @@ type UpdatePlantInput struct {
 	WateringSchedule    CreateWateringScheduleInput    `form:"watering_schedule"`
 	PlantCharacteristic CreatePlantCharacteristicInput `form:"plant_characteristic" validate:"required"`
 	PlantInstructions   []CreatePlantInstructionInput  `form:"plant_instructions"`
+	AdditionalTips      string                         `form:"additional_tips"`
 	PlantFAQs           []CreatePlantFAQInput          `form:"plant_faqs"`
 	PlantImages         []CreatePlantImageInput        `form:"plant_images" validate:"required,dive"`
 }
@@ -67,7 +69,6 @@ type CreatePlantInstructionInput struct {
 	StepTitle             string `form:"step_title" validate:"required"`
 	StepDescription       string `form:"step_description" validate:"required"`
 	StepImageURL          string `form:"step_image_url"`
-	AdditionalTips        string `form:"additional_tips"`
 }
 
 type CreatePlantFAQInput struct {

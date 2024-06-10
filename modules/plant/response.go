@@ -12,9 +12,10 @@ type PlantResponse struct {
 	ClimateCondition 			string											  `json:"climate_condition"`
 	PlantingTime     			string                        `json:"planting_time"`
 	Sunlight         			string                        `json:"sunlight"`
-	PlantCharacteristic 		PlantCharacteristicResponse 		`json:"plant_characteristic"`
+	PlantCharacteristic 	PlantCharacteristicResponse 		`json:"plant_characteristic"`
 	WateringSchedule 			PlantReminderResponse      		`json:"watering_schedule"`
 	PlantInstruction 			[]PlantInstructionResponse 		`json:"plant_instructions"`
+	AdditionalTips 				string 												`json:"additional_tips"`
 	PlantFAQ         			[]PlantFAQResponse         		`json:"plant_faqs"`
 	PlantImages      			[]PlantImageResponse       		`json:"plant_images"`
 	CreatedAt        			time.Time                  		`json:"created_at"`
@@ -62,7 +63,6 @@ type PlantInstructionResponse struct {
 	StepTitle        			string    		`json:"step_title"`
 	StepDescription  			string    		`json:"step_description"`
 	StepImageURL     			string    		`json:"step_image_url"`
-	AdditionalTips   			string    		`json:"additional_tips"`
 }
 
 type PlantInstructionCategoryResponse struct {
@@ -102,6 +102,7 @@ func NewPlantResponse(plant Plant) PlantResponse {
 		PlantCharacteristic : NewPlantCharacteristicResponse(plant.PlantCharacteristic),
 		WateringSchedule	 : NewPlantReminderResponse(plant.WateringSchedule),
 		PlantInstruction	 : NewPlantInstructionResponses(plant.PlantInstructions),
+		AdditionalTips		 : plant.AdditionalTips,
 		PlantFAQ					 : NewPlantFAQResponses(plant.PlantFAQs),
 		PlantImages				 : NewPlantImageResponses(plant.PlantImages),
 		CreatedAt					 : plant.CreatedAt,
@@ -198,7 +199,6 @@ func NewPlantInstructionResponse(instruction PlantInstruction) PlantInstructionR
 		StepTitle				: instruction.StepTitle,
 		StepDescription	: instruction.StepDescription,
 		StepImageURL		: instruction.StepImageURL,
-		AdditionalTips	: instruction.AdditionalTips,
 	}
 }
 

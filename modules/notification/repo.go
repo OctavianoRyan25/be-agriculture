@@ -1,12 +1,15 @@
 package notification
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Repository interface {
 	StoreNotification(*Notification) (*Notification, error)
 	ReadNotification(int) (*Notification, error)
 	GetAllNotifications(uint) ([]Notification, error)
 	DeleteAllNotifications(uint) error
+	CreateCustomizeWateringReminder(*CustomizeWateringReminder) (*CustomizeWateringReminder, error)
 }
 
 type notificationRepository struct {
@@ -60,4 +63,17 @@ func (r *notificationRepository) DeleteAllNotifications(userID uint) error {
 	}
 
 	return nil
+}
+
+func (r *notificationRepository) CreateCustomizeWateringReminder(reminder *CustomizeWateringReminder) (*CustomizeWateringReminder, error) {
+	err := r.db.Create(reminder).Error
+	if err != nil {
+		return nil, err
+	}
+	err = r.db.Preload("MyPlant").Preload("MyPlant.Plant").Preload("MyPlant.User").First(reminder).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return reminder, nil
 }

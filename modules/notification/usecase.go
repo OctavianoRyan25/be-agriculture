@@ -7,6 +7,7 @@ type UseCase interface {
 	ReadNotification(int) (*Notification, error)
 	GetAllNotifications(uint) ([]Notification, error)
 	DeleteAllNotifications(uint) error
+	CreateCustomizeWateringReminder(*CustomizeWateringReminder) (*CustomizeWateringReminder, error)
 }
 
 type notificationUseCase struct {
@@ -36,4 +37,11 @@ func (u *notificationUseCase) GetAllNotifications(userID uint) ([]Notification, 
 
 func (u *notificationUseCase) DeleteAllNotifications(userID uint) error {
 	return u.notificationRepo.DeleteAllNotifications(userID)
+}
+
+func (u *notificationUseCase) CreateCustomizeWateringReminder(reminder *CustomizeWateringReminder) (*CustomizeWateringReminder, error) {
+	location, _ := time.LoadLocation("Asia/Jakarta")
+	reminder.CreatedAt = time.Now().In(location)
+	reminder.UpdatedAt = time.Now().In(location)
+	return u.notificationRepo.CreateCustomizeWateringReminder(reminder)
 }

@@ -12,6 +12,9 @@ type PlantService interface {
 	DeletePlant(id int) (PlantResponse, error)
 	CountAll() (int64, error)
 	SearchPlantsByName(name string, page, limit int) ([]Plant, int64, error)
+	GetRecommendations(userID int) ([]PlantResponse, error)
+	FindByCategoryID(categoryID int) ([]PlantResponse, error)
+	CategoryExists(categoryID int) (bool, error)
 }
 
 type plantService struct {
@@ -21,6 +24,40 @@ type plantService struct {
 
 func NewPlantService(repository PlantRepository, plantCategoryRepository PlantCategoryRepository) PlantService {
 	return &plantService{repository, plantCategoryRepository}
+}
+
+func (s *plantService) GetRecommendations(userID int) ([]PlantResponse, error) {
+	var plants []Plant
+	err := s.repository.FindRecommendations(userID, &plants).Error
+	if err != nil {
+			return nil, err
+	}
+
+	var plantResponses []PlantResponse
+	for _, plant := range plants {
+			plantResponses = append(plantResponses, NewPlantResponse(plant))
+	}
+
+	return plantResponses, nil
+}
+
+func (s *plantService) FindByCategoryID(categoryID int) ([]PlantResponse, error) {
+	var plants []Plant
+	err := s.repository.FindByCategoryID(categoryID, &plants).Error
+	if err != nil {
+			return nil, err
+	}
+
+	var plantResponses []PlantResponse
+	for _, plant := range plants {
+			plantResponses = append(plantResponses, NewPlantResponse(plant))
+	}
+
+	return plantResponses, nil
+}
+
+func (s *plantService) CategoryExists(categoryID int) (bool, error) {
+	return s.repository.CategoryExists(categoryID)
 }
 
 func (s *plantService) FindAll(page, limit int) ([]PlantResponse, error) {
@@ -36,7 +73,6 @@ func (s *plantService) FindAll(page, limit int) ([]PlantResponse, error) {
 
 	return responses, nil
 }
-
 
 func (s *plantService) FindByID(id int) (PlantResponse, error) {
 	plant, err := s.repository.FindByID(id)
@@ -66,6 +102,7 @@ func (s *plantService) CreatePlant(input CreatePlantInput) (PlantResponse, error
 		CreatedAt:          time.Now(),
 		UpdatedAt:          time.Now(),
 		PlantInstructions:  make([]PlantInstruction, len(input.PlantInstructions)),
+		AdditionalTips:     input.AdditionalTips,
 		PlantFAQs:          make([]PlantFAQ, len(input.PlantFAQs)),
 		PlantImages:        make([]PlantImage, len(input.PlantImages)),
 		PlantCharacteristic: PlantCharacteristic{
@@ -93,7 +130,6 @@ func (s *plantService) CreatePlant(input CreatePlantInput) (PlantResponse, error
 			StepTitle:       instruction.StepTitle,
 			StepDescription: instruction.StepDescription,
 			StepImageURL:    instruction.StepImageURL,
-			AdditionalTips:  instruction.AdditionalTips,
 			CreatedAt:       time.Now(),
 			UpdatedAt:       time.Now(),
 		}
@@ -146,6 +182,7 @@ func (s *plantService) UpdatePlant(id int, input UpdatePlantInput) (PlantRespons
 	plant.PlantCategoryID = input.PlantCategoryID
 	plant.PlantCategory = category
 	plant.ClimateCondition = input.ClimateCondition
+	plant.AdditionalTips = input.AdditionalTips
 	plant.UpdatedAt = time.Now()
 
 	// Update PlantCharacteristic
@@ -193,7 +230,6 @@ func (s *plantService) UpdatePlant(id int, input UpdatePlantInput) (PlantRespons
 			StepTitle:       instruction.StepTitle,
 			StepDescription: instruction.StepDescription,
 			StepImageURL:    instruction.StepImageURL,
-			AdditionalTips:  instruction.AdditionalTips,
 			CreatedAt:       time.Now(),
 			UpdatedAt:       time.Now(),
 		}
@@ -231,7 +267,6 @@ func (s *plantService) UpdatePlant(id int, input UpdatePlantInput) (PlantRespons
 
 	return NewPlantResponse(updatedPlant), nil
 }
-
 
 func (s *plantService) DeletePlant(id int) (PlantResponse, error) {
 	plant, err := s.repository.FindByIDWithRelations(id)
