@@ -113,9 +113,9 @@ func StartScheduler(db *gorm.DB, useCase UseCase) {
 	}
 
 	c := cron.New()
-	c.AddFunc("@every 1m", func() {
-		handlerRegularReminder(db, useCase, location, "daily")
-	})
+	// c.AddFunc("@every 1m", func() {
+	// 	handlerRegularReminder(db, useCase, location, "daily")
+	// })
 	c.AddFunc("0 * * * *", func() {
 		handlerRegularReminder(db, useCase, location, "daily")
 	})
@@ -237,9 +237,9 @@ func StartSchedulerForCustomizeWateringReminder(db *gorm.DB, useCase UseCase) {
 		return
 	}
 	c := cron.New()
-	c.AddFunc("@every 1m", func() {
-		handleCustomizedReminders(db, useCase, location, "daily")
-	})
+	// c.AddFunc("@every 1m", func() {
+	// 	handleCustomizedReminders(db, useCase, location, "daily")
+	// })
 	c.AddFunc("0 * * * *", func() {
 		handleCustomizedReminders(db, useCase, location, "daily")
 	})
