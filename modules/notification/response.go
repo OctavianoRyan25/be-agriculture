@@ -12,3 +12,12 @@ type NotificationResponse struct {
 	IsRead    bool      `json:"is_read"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+type CustomizeWateringReminderResponse struct {
+	Id        int       `json:"id"`
+	MyPlantID int       `json:"my_plant_id"`
+	Time      string    `json:"time"`
+	Recurring bool      `json:"recurring"`
+	Type      string    `json:"type"`
+	CreatedAt time.Time `json:"created_at"`
+}
