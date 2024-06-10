@@ -79,6 +79,12 @@ func (h *PlantInstructionCategoryHandler) Create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response)
 	}
 
+	const maxFileSize = 2 * 1024 * 1024
+	if file.Size > maxFileSize {
+		response := helper.APIResponse("File size exceeds 2MB", http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
 	fileReader, err := file.Open()
 	if err != nil {
 		response := helper.APIResponse("Failed to open uploaded file", http.StatusInternalServerError, "error", nil)
@@ -141,6 +147,12 @@ func (h *PlantInstructionCategoryHandler) Update(c echo.Context) error {
 	file, err := c.FormFile("image_url")
 	if err != nil && err != http.ErrMissingFile {
 		response := helper.APIResponse("Failed to get uploaded image", http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	const maxFileSize = 2 * 1024 * 1024
+	if file.Size > maxFileSize {
+		response := helper.APIResponse("File size exceeds 2MB", http.StatusBadRequest, "error", nil)
 		return c.JSON(http.StatusBadRequest, response)
 	}
 

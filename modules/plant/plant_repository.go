@@ -15,6 +15,9 @@ type PlantRepository interface {
 	ClearPlantInstructions(plantID int) error
 	ClearPlantFAQs(plantID int) error
 	ClearPlantImages(plantID int) error
+	FindRecommendations(userID int, plants *[]Plant) *gorm.DB
+	FindByCategoryID(categoryID int, plants *[]Plant) *gorm.DB
+	CategoryExists(categoryID int) (bool, error)
 }
 
 type plantRepository struct {
@@ -23,6 +26,40 @@ type plantRepository struct {
 
 func NewPlantRepository(db *gorm.DB) PlantRepository {
 	return &plantRepository{db}
+}
+
+func (r *plantRepository) FindRecommendations(userID int, plants *[]Plant) *gorm.DB {
+	subQuery := r.db.Table("user_plants").Select("plant_id").Where("user_id = ?", userID)
+	return r.db.Preload("PlantCategory").
+			Preload("PlantCharacteristic").
+			Preload("WateringSchedule").
+			Preload("PlantInstructions").
+			Preload("PlantInstructions.InstructionCategory").
+			Preload("PlantFAQs").
+			Preload("PlantImages").
+			Where("id NOT IN (?)", subQuery).
+			Find(plants)
+}
+
+func (r *plantRepository) FindByCategoryID(categoryID int, plants *[]Plant) *gorm.DB {
+	return r.db.Preload("PlantCategory").
+			Preload("PlantCharacteristic").
+			Preload("WateringSchedule").
+			Preload("PlantInstructions").
+			Preload("PlantInstructions.InstructionCategory").
+			Preload("PlantFAQs").
+			Preload("PlantImages").
+			Where("plant_category_id = ?", categoryID).
+			Find(plants)
+}
+
+func (r *plantRepository) CategoryExists(categoryID int) (bool, error) {
+	var count int64
+	err := r.db.Model(&PlantCategory{}).Where("id = ?", categoryID).Count(&count).Error
+	if err != nil {
+			return false, err
+	}
+	return count > 0, nil
 }
 
 func (r *plantRepository) FindAll(page, limit int) ([]Plant, error) {
@@ -41,14 +78,12 @@ func (r *plantRepository) FindAll(page, limit int) ([]Plant, error) {
 	return plants, err
 }
 
-
 func (r *plantRepository) FindByID(id int) (Plant, error) {
 	var plant Plant
 	err := r.db.Preload("PlantCategory").Preload("PlantCharacteristic").Preload("WateringSchedule").
 		Preload("PlantInstructions").Preload("PlantInstructions.InstructionCategory").Preload("PlantFAQs").Preload("PlantImages").First(&plant, id).Error
 	return plant, err
 }
-
 
 func (r *plantRepository) Create(plant Plant) (Plant, error) {
 	err := r.db.Create(&plant).Error
