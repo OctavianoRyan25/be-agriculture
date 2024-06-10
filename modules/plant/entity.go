@@ -110,12 +110,11 @@ type PlantCategory struct {
 }
 
 type UserPlant struct {
-	ID            int       `json:"id" gorm:"primaryKey"`
-	UserID        int       `json:"user_id"`
-	PlantID       int       `json:"plant_id"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
-	LastWateredAt time.Time `json:"last_watered_at"`
-	Plant         Plant     `json:"plant" gorm:"foreignKey:PlantID;references:ID"`
-	User          user.User `json:"user" gorm:"foreignKey:UserID;references:ID"`
+	ID        int       `json:"id" gorm:"primaryKey"`
+	UserID    int       `json:"user_id"`
+	PlantID   int       `json:"plant_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Plant     Plant     `json:"plant" gorm:"foreignKey:PlantID;references:ID"`
+	User      user.User `json:"user" gorm:"foreignKey:UserID;references:ID"`
 }
