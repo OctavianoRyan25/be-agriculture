@@ -126,7 +126,6 @@ func (h *UserPlantHandler) GetUserPlants(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-
 func (h *UserPlantHandler) DeleteUserPlantByID(c echo.Context) error {
     userPlantID, err := strconv.Atoi(c.Param("user_plant_id"))
     if err != nil {
@@ -156,3 +155,60 @@ func (h *UserPlantHandler) DeleteUserPlantByID(c echo.Context) error {
     response := helper.APIResponse("User plant deleted successfully", http.StatusOK, "success", deletedUserPlant)
     return c.JSON(http.StatusOK, response)
 }
+
+func (h *UserPlantHandler) AddUserPlantHistory(c echo.Context) error {
+	var input plant.UserPlantHistoryInput
+	if err := c.Bind(&input); err != nil {
+		response := helper.APIResponse("Invalid request", http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	userID, ok := c.Get("user_id").(uint)
+	if !ok {
+		response := helper.APIResponse("Invalid user ID from token", http.StatusInternalServerError, "error", nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+	input.UserID = int(userID)
+
+	if input.PlantID == 0 {
+		response := helper.APIResponse("Plant ID is required", http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	plantExists, err := h.service.CheckPlantExists(input.PlantID)
+	if err != nil {
+			response := helper.APIResponse("Failed to verify plant ID", http.StatusInternalServerError, "error", nil)
+			return c.JSON(http.StatusInternalServerError, response)
+	}
+	if !plantExists {
+			response := helper.APIResponse("Plant ID does not exist", http.StatusBadRequest, "error", nil)
+			return c.JSON(http.StatusBadRequest, response)
+	}
+
+	history, err := h.service.AddUserPlantHistory(input)
+	if err != nil {
+		response := helper.APIResponse("Failed to create user plant history", http.StatusInternalServerError, "error", nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	response := helper.APIResponse("User plant history created successfully", http.StatusCreated, "success", history)
+	return c.JSON(http.StatusCreated, response)
+}
+
+func (h *UserPlantHandler) GetUserPlantHistoryByUserID(c echo.Context) error {
+	userID, ok := c.Get("user_id").(uint)
+	if !ok {
+		response := helper.APIResponse("Invalid user ID from token", http.StatusInternalServerError, "error", nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	history, err := h.service.GetUserPlantHistoryByUserID(int(userID))
+	if err != nil {
+		response := helper.APIResponse("Failed to get user plant history", http.StatusInternalServerError, "error", nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	response := helper.APIResponse("User plant history fetched successfully", http.StatusOK, "success", history)
+	return c.JSON(http.StatusOK, response)
+}
+

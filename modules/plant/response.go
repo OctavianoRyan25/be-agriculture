@@ -250,3 +250,22 @@ func NewUserPlantResponses(userPlants []UserPlant) map[int][]UserPlantResponse {
 	return responses
 }
 
+type UserPlantHistoryResponse struct {
+	ID        		int       `json:"id"`
+	UserID    		int       `json:"user_id"`
+	PlantName 		string    `json:"plant_name"`
+	PlantCategory string 		`json:"plant_category"`
+	ImageURL  		string    `json:"image_url"`
+	CreatedAt 		time.Time `json:"created_at"`
+}
+
+func NewUserPlantHistoryResponse(userPlantHistory UserPlantHistory) UserPlantHistoryResponse {
+	return UserPlantHistoryResponse{
+		ID:        userPlantHistory.ID,
+		UserID:    userPlantHistory.UserID,
+		PlantName: userPlantHistory.PlantName,
+		PlantCategory: userPlantHistory.PlantCategory,
+		ImageURL:  userPlantHistory.PlantImageURL,
+		CreatedAt: userPlantHistory.CreatedAt,
+	}
+}

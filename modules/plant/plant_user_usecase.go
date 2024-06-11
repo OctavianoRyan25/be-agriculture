@@ -6,6 +6,10 @@ type UserPlantService interface {
 	DeleteUserPlantByID(userPlantID int) (UserPlantResponse, error)
 	GetUserPlantByID(userPlantID int) (UserPlant, error)
 	CountByUserID(userID int) (int64, error)
+
+	AddUserPlantHistory(input UserPlantHistoryInput) (UserPlantHistoryResponse, error)
+	GetUserPlantHistoryByUserID(userID int) ([]UserPlantHistoryResponse, error)
+	CheckPlantExists(plantID int) (bool, error)
 }
 
 type userPlantService struct {
@@ -14,6 +18,56 @@ type userPlantService struct {
 
 func NewUserPlantService(repository UserPlantRepository) UserPlantService {
 	return &userPlantService{repository}
+}
+
+func (s *userPlantService) CheckPlantExists(plantID int) (bool, error) {
+	return s.repository.CheckPlantExists(plantID)
+}
+
+func (s *userPlantService) GetUserPlantHistoryByUserID(userID int) ([]UserPlantHistoryResponse, error) {
+	histories, err := s.repository.GetUserPlantHistoryByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var response []UserPlantHistoryResponse
+	for _, history := range histories {
+		response = append(response, NewUserPlantHistoryResponse(history))
+	}
+
+	return response, nil
+}
+
+func (s *userPlantService) AddUserPlantHistory(input UserPlantHistoryInput) (UserPlantHistoryResponse, error) {
+	plant, err := s.repository.GetPlantByID(input.PlantID)
+	if err != nil {
+		return UserPlantHistoryResponse{}, err
+	}
+
+	category, err := s.repository.GetPlantCategoryByID(plant.PlantCategoryID)
+	if err != nil {
+		return UserPlantHistoryResponse{}, err
+	}
+
+	image, err := s.repository.GetPrimaryPlantImageByPlantID(input.PlantID)
+	if err != nil {
+		return UserPlantHistoryResponse{}, err
+	}
+
+	userPlantHistory := UserPlantHistory{
+		UserID:        input.UserID,
+		PlantID:       input.PlantID,
+		PlantName:     plant.Name,
+		PlantCategory: category.Name,
+		PlantImageURL: image.FileName,
+	}
+
+	createdUserPlantHistory, err := s.repository.Create(userPlantHistory)
+	if err != nil {
+		return UserPlantHistoryResponse{}, err
+	}
+
+	return NewUserPlantHistoryResponse(createdUserPlantHistory), nil
 }
 
 func (s *userPlantService) AddUserPlant(input AddUserPlantInput) (UserPlantResponse, error) {

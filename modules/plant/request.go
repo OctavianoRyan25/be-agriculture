@@ -91,3 +91,11 @@ type PlantProgressInput struct {
 	UserID   int    `json:"user_id" form:"user_id"`
 	ImageURL string `form:"image_url"`
 }
+
+type UserPlantHistoryInput struct {
+	UserID        int    `json:"user_id" form:"user_id"`
+	PlantID       int    `json:"plant_id" form:"plant_id" validate:"required"`
+	PlantName     string `json:"plant_name" form:"plant_name"`
+	PlantCategory string `json:"plant_category" form:"plant_category"`
+	ImageURL      string `json:"image_url" form:"image_url"`
+}
