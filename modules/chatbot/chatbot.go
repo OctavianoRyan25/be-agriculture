@@ -3,7 +3,7 @@ package chatbot
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"github.com/OctavianoRyan25/be-agriculture/modules/chatbot/request"
 
@@ -16,7 +16,7 @@ type ChatAI struct{}
 var AiPayload = map[string]interface{}{
 	"model": "gpt-3.5-turbo",
 	"messages": []map[string]string{
-		{"role": "system", "content": "Anda seorang ahli dalam bidang peralatan kebersihan lingkungan, pertanian, daur ulang, dan alat rekreasi seperti hiking dan camping"},
+		{"role": "system", "content": "Anda seorang ahli dalam bidang pertanian dan perkebunan"},
 	},
 }
 
@@ -56,7 +56,7 @@ func (c *ChatAI) HandleChatCompletion(ctx echo.Context) error {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to read response body"})
 	}
