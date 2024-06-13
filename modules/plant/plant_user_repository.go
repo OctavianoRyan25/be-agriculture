@@ -15,6 +15,9 @@ type UserPlantRepository interface {
 	GetPrimaryPlantImageByPlantID(plantID int) (PlantImage, error)
 	GetUserPlantHistoryByUserID(userID int) ([]UserPlantHistory, error)
 	CheckPlantExists(plantID int) (bool, error)
+	UpdateCustomizeName(userPlantID int, customizeName string) error
+	CheckUserPlantExists(userPlantID int) (bool, error)
+	CheckUserPlantExistsForAdd(userID, plantID int) (bool, error)
 }
 
 type userPlantRepository struct {
@@ -23,6 +26,21 @@ type userPlantRepository struct {
 
 func NewUserPlantRepository(db *gorm.DB) UserPlantRepository {
 	return &userPlantRepository{db}
+}
+
+func (r *userPlantRepository) CheckUserPlantExists(userPlantID int) (bool, error) {
+	var count int64
+	if err := r.db.Model(&UserPlant{}).Where("id = ?", userPlantID).Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (r *userPlantRepository) UpdateCustomizeName(userPlantID int, customizeName string) error {
+	if err := r.db.Model(&UserPlant{}).Where("id = ?", userPlantID).Update("customize_name", customizeName).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *userPlantRepository) CheckPlantExists(plantID int) (bool, error) {
@@ -61,6 +79,16 @@ func (r *userPlantRepository) GetPrimaryPlantImageByPlantID(plantID int) (PlantI
 	}
 	return image, nil
 }
+
+func (r *userPlantRepository) CheckUserPlantExistsForAdd(userID, plantID int) (bool, error) {
+	var count int64
+	result := r.db.Model(&UserPlant{}).Where("user_id = ? AND plant_id = ?", userID, plantID).Count(&count)
+	if result.Error != nil {
+			return false, result.Error
+	}
+	return count > 0, nil
+}
+
 func (r *userPlantRepository) Create(userPlantHistory UserPlantHistory) (UserPlantHistory, error) {
 	if err := r.db.Create(&userPlantHistory).Error; err != nil {
 		return userPlantHistory, err

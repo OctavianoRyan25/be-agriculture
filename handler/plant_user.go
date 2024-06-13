@@ -19,35 +19,46 @@ func NewUserPlantHandler(service plant.UserPlantService) *UserPlantHandler {
 }
 
 func (h *UserPlantHandler) AddUserPlant(c echo.Context) error {
-    var request plant.AddUserPlantInput
-    if err := c.Bind(&request); err != nil {
-        response := helper.APIResponse("Invalid request", http.StatusBadRequest, "error", nil)
-        return c.JSON(http.StatusBadRequest, response)
-    }
+	var request plant.AddUserPlantInput
+	if err := c.Bind(&request); err != nil {
+			response := helper.APIResponse("Invalid request", http.StatusBadRequest, "error", nil)
+			return c.JSON(http.StatusBadRequest, response)
+	}
 
-    validate := validator.New()
-    if err := validate.Struct(request); err != nil {
-        errors := helper.FormatValidationError(err)
-        response := helper.APIResponse(errors[0], http.StatusBadRequest, "error", nil)
-        return c.JSON(http.StatusBadRequest, response)
-    }
+	validate := validator.New()
+	if err := validate.Struct(request); err != nil {
+			errors := helper.FormatValidationError(err)
+			response := helper.APIResponse(errors[0], http.StatusBadRequest, "error", nil)
+			return c.JSON(http.StatusBadRequest, response)
+	}
 
-    userID, ok := c.Get("user_id").(uint)
-    if !ok {
-        response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-        return c.JSON(http.StatusUnauthorized, response)
-    }
+	userID, ok := c.Get("user_id").(uint)
+	if !ok {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			return c.JSON(http.StatusUnauthorized, response)
+	}
 
-    request.UserID = int(userID)
+	request.UserID = int(userID)
 
-    userPlant, err := h.service.AddUserPlant(request)
-    if err != nil {
-        response := helper.APIResponse("Failed to add plant to user", http.StatusInternalServerError, "error", nil)
-        return c.JSON(http.StatusInternalServerError, response)
-    }
+	// Check if the plant already exists for the user
+	exists, err := h.service.CheckUserPlantExistsForAdd(request.UserID, request.PlantID)
+	if err != nil {
+			response := helper.APIResponse("Failed to add plant to user", http.StatusInternalServerError, "error", nil)
+			return c.JSON(http.StatusInternalServerError, response)
+	}
+	if exists {
+			response := helper.APIResponse("Plant already exists for the user", http.StatusBadRequest, "error", nil)
+			return c.JSON(http.StatusBadRequest, response)
+	}
 
-    response := helper.APIResponse("Plant added to user successfully", http.StatusCreated, "success", userPlant)
-    return c.JSON(http.StatusCreated, response)
+	userPlant, err := h.service.AddUserPlant(request)
+	if err != nil {
+			response := helper.APIResponse("Failed to add plant to user", http.StatusInternalServerError, "error", nil)
+			return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	response := helper.APIResponse("Plant added to user successfully", http.StatusCreated, "success", userPlant)
+	return c.JSON(http.StatusCreated, response)
 }
 
 func (h *UserPlantHandler) GetUserPlants(c echo.Context) error {
@@ -209,6 +220,43 @@ func (h *UserPlantHandler) GetUserPlantHistoryByUserID(c echo.Context) error {
 	}
 
 	response := helper.APIResponse("User plant history fetched successfully", http.StatusOK, "success", history)
+	return c.JSON(http.StatusOK, response)
+}
+
+func (h *UserPlantHandler) UpdateCustomizeName(c echo.Context) error {
+	var input struct {
+		CustomizeName string `json:"customize_name" form:"customize_name" validate:"required"`
+	}
+
+	if err := c.Bind(&input); err != nil {
+		response := helper.APIResponse("Invalid request", http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	userPlantID, err := strconv.Atoi(c.Param("userPlantID"))
+	if err != nil {
+		response := helper.APIResponse("Invalid user plant ID", http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	exists, err := h.service.CheckUserPlantExists(userPlantID)
+	if err != nil {
+		response := helper.APIResponse("Error checking user plant existence", http.StatusInternalServerError, "error", nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	if !exists {
+		response := helper.APIResponse("User plant ID not found", http.StatusNotFound, "error", nil)
+		return c.JSON(http.StatusNotFound, response)
+	}
+
+	updatedPlant, err := h.service.UpdateCustomizeName(userPlantID, input.CustomizeName)
+	if err != nil {
+		response := helper.APIResponse("Failed to update customize name", http.StatusInternalServerError, "error", nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	response := helper.APIResponse("Customize name updated successfully", http.StatusOK, "success", updatedPlant)
 	return c.JSON(http.StatusOK, response)
 }
 

@@ -114,6 +114,7 @@ type UserPlant struct {
 	ID         					 int 								`json:"id" gorm:"primaryKey"`
 	UserID     					 int								`json:"user_id"`
 	PlantID    					 int 								`json:"plant_id"`
+	CustomizeName 			 string 						`json:"customize_name"`
 	CreatedAt  					 time.Time	  			`json:"created_at"`
 	UpdatedAt  					 time.Time 					`json:"updated_at"`
 	

@@ -82,8 +82,9 @@ type CreatePlantImageInput struct {
 }
 
 type AddUserPlantInput struct {
-	UserID  int `json:"user_id" form:"user_id"`
-	PlantID int `json:"plant_id" form:"plant_id" validate:"required"`
+	UserID        int    `json:"user_id" form:"user_id"`
+	PlantID       int    `json:"plant_id" form:"plant_id" validate:"required"`
+	CustomizeName string `json:"customize_name" form:"customize_name"`
 }
 
 type PlantProgressInput struct {

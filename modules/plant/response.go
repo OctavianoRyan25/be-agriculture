@@ -225,6 +225,7 @@ func NewPlantFAQResponse(faq PlantFAQ) PlantFAQResponse {
 type UserPlantResponse struct {
 	ID        int       `json:"id"`
 	Plant     PlantResponse `json:"plant"`
+	CustomizeName string `json:"customize_name"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -232,6 +233,7 @@ func NewUserPlantResponse(userPlant UserPlant) UserPlantResponse {
 	return UserPlantResponse{
 		ID:        userPlant.ID,
 		Plant:     NewPlantResponse(userPlant.Plant),
+		CustomizeName: userPlant.CustomizeName,
 		CreatedAt: userPlant.CreatedAt,
 	}
 }
