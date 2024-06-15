@@ -32,7 +32,7 @@ func (r *wateringHistoryRepository) StoreWateringHistory(wh *WateringHistory) (*
 
 func (r *wateringHistoryRepository) GetAllWateringHistories(userID uint) ([]WateringHistory, error) {
 	var wh []WateringHistory
-	err := r.db.Preload("User").Preload("Plant").Order("created_at desc").Where("user_id = ?", userID).Find(&wh).Error
+	err := r.db.Preload("User").Preload("Plant").Preload("Plant.PlantImages").Order("created_at desc").Where("user_id = ?", userID).Find(&wh).Error
 	if err != nil {
 		return nil, err
 	}

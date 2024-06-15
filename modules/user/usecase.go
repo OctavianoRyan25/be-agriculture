@@ -108,16 +108,12 @@ func (uc *userUseCase) VerifyEmail(email, otp string) (int, error) {
 }
 
 func (uc *userUseCase) Login(user *User) (*User, int, error) {
-	validated, err := uc.repo.IsValidated(user.Email)
+	user, err := uc.repo.Login(user)
 	if err != nil {
 		return nil, constants.ErrCodeBadRequest, err
 	}
-	if !validated {
+	if !user.Is_Active {
 		return nil, constants.ErrCodeEmailNotValidatedYet, errors.New(constants.ErrEmailNotValidatedYet)
-	}
-	user, err = uc.repo.Login(user)
-	if err != nil {
-		return nil, constants.ErrCodeBadRequest, err
 	}
 	return user, constants.CodeSuccess, nil
 }

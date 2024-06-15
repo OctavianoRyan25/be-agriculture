@@ -101,7 +101,7 @@ func main() {
 	fertilizerUseCase := fertilizer.NewUseCase(fertilizerRepo)
 	fertilizerController := fertilizer.NewFertilizerController(fertilizerUseCase)
 
-	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler, searchController, notificationController, wateringHistoryController, fertilizerController )
+	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler, searchController, notificationController, wateringHistoryController, fertilizerController)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

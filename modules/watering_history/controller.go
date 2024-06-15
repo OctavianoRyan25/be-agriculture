@@ -91,9 +91,9 @@ func (c *WateringHistoryController) GetAllWateringHistories(ctx echo.Context) er
 		return ctx.JSON(http.StatusInternalServerError, errRes)
 	}
 
-	var mappedres []WateringHistoryResponse
+	var mappedRes []WateringHistoryResponse
 	for _, v := range wh {
-		mappedres = append(mappedres, WateringHistoryResponse{
+		mappedRes = append(mappedRes, WateringHistoryResponse{
 			Id:        v.ID,
 			Plant:     *MapPlantToPlantResponse(&v.Plant),
 			User:      *user.MapUserToResponse(&v.User),
@@ -104,7 +104,7 @@ func (c *WateringHistoryController) GetAllWateringHistories(ctx echo.Context) er
 	res := base.SuccessResponse{
 		Status:  "success",
 		Message: "Watering histories fetched",
-		Data:    mappedres,
+		Data:    mappedRes,
 	}
 
 	return ctx.JSON(http.StatusOK, res)
