@@ -4,134 +4,197 @@ import (
 	"net/http"
 
 	"github.com/OctavianoRyan25/be-agriculture/base"
+	"github.com/OctavianoRyan25/be-agriculture/utils/helper"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"strconv"
-	"time"
 )
 
-func GetFertilizer(c echo.Context) error {
-	fertilizer := []Fertilizer{{Id: 1, Name: "NPK", Compostition: "Natrium, Pottasium, Carbon", CreateAt: time.Now()}}
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"fertilizer": fertilizer,
-	})
+type FertilizerController struct {
+	useCase FertilizerUseCase
 }
 
-func GetFertilizerById(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("Id"))
-	fertilizer := []Fertilizer{{Id: id, Name: "NPK", Compostition: "Natrium, Pottasium, Carbon", CreateAt: time.Now()}}
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"fertilizer": fertilizer,
-	})
+func NewFertilizerController(useCase FertilizerUseCase) *FertilizerController {
+	return &FertilizerController{
+		useCase: useCase,
+	}
 }
 
-// Create a new Fertilizer
-func CreateFertilizer(c echo.Context) error {
-	userId := c.Get("user_id").(uint)
-	if userId == 0 {
+func (c *FertilizerController) CreateFertilizer(ctx echo.Context) error {
+
+	req := new(FertilizerRequest)
+	err := ctx.Bind(&req)
+	if err != nil {
 		errRes := base.ErrorResponse{
 			Status:  "error",
-			Message: "Bad request",
+			Message: err.Error(),
+			Code:    http.StatusUnprocessableEntity,
+		}
+		return ctx.JSON(http.StatusUnprocessableEntity, errRes)
+	}
+
+	validate := validator.New()
+
+	err = validate.Struct(req)
+	if err != nil {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: err.Error(),
 			Code:    http.StatusBadRequest,
 		}
-		return c.JSON(http.StatusBadRequest, errRes)
+		return ctx.JSON(http.StatusBadRequest, errRes)
 	}
-	role := c.Get("role").(string)
-	if role != "admin" {
+
+	mapped := &Fertilizer{
+		Id: req.Id,
+	}
+
+	wh, err := c.useCase.CreateFertilizer(mapped)
+	if err != nil {
 		errRes := base.ErrorResponse{
 			Status:  "error",
-			Message: "Forbidden access",
-			Code:    http.StatusForbidden,
+			Message: err.Error(),
+			Code:    http.StatusInternalServerError,
 		}
-		return c.JSON(http.StatusForbidden, errRes)
-
-	}
-	var fertilizer Fertilizer
-	if err := c.Bind(&fertilizer); err != nil {
-		return err
+		return ctx.JSON(http.StatusInternalServerError, errRes)
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"fertilizer": fertilizer,
-	})
+	mappedres := &FertilizerResponse{
+		Id:           wh.Id,
+		Name:         wh.Name,
+		Compostition: wh.Compostition,
+		CreateAt:     wh.CreateAt,
+	}
+
+	res := base.SuccessResponse{
+		Status:  "success",
+		Message: "Watering history created",
+		Data:    mappedres,
+	}
+
+	return ctx.JSON(http.StatusCreated, res)
+}
+
+func (c *FertilizerController) GetFertilizer(ctx echo.Context) error {
+	userID := ctx.Get("Id").(uint)
+
+	wh, err := c.useCase.GetFertilizer(userID)
+	if err != nil {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: err.Error(),
+			Code:    http.StatusInternalServerError,
+		}
+		return ctx.JSON(http.StatusInternalServerError, errRes)
+	}
+
+	var mappedres []FertilizerResponse
+	for _, v := range wh {
+		mappedres = append(mappedres, FertilizerResponse{
+			Id:           v.Id,
+			Name:         v.Name,
+			Compostition: v.Compostition,
+			CreateAt:     v.CreateAt,
+		})
+	}
+
+	res := base.SuccessResponse{
+		Status:  "success",
+		Message: "Fertilizer fetched",
+		Data:    mappedres,
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+}
+
+func (c *FertilizerController) GetFertilizerById(ctx echo.Context) error {
+	userID := ctx.Get("Id").(uint)
+
+	wh, err := c.useCase.GetFertilizer(userID)
+	if err != nil {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: err.Error(),
+			Code:    http.StatusInternalServerError,
+		}
+		return ctx.JSON(http.StatusInternalServerError, errRes)
+	}
+
+	var mappedres []FertilizerResponse
+	for _, v := range wh {
+		mappedres = append(mappedres, FertilizerResponse{
+			Id:           v.Id,
+			Name:         v.Name,
+			Compostition: v.Compostition,
+			CreateAt:     v.CreateAt,
+		})
+	}
+
+	res := base.SuccessResponse{
+		Status:  "success",
+		Message: "Fertilizer fetched",
+		Data:    mappedres,
+	}
+
+	return ctx.JSON(http.StatusOK, res)
 }
 
 // Update a Fertilizer by Id
-func UpdateFertilizer(c echo.Context) error {
+func (h *FertilizerController) UpdateFertilizer(c echo.Context) error {
+	_, err := strconv.Atoi(c.Param("Id"))
+
+	if err != nil {
+		response := helper.APIResponse("Invalid ID", http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
 	role := c.Get("role").(string)
 	if role != "admin" {
-		errRes := base.ErrorResponse{
-			Status:  "error",
-			Message: "Forbidden access",
-			Code:    http.StatusForbidden,
-		}
-		return c.JSON(http.StatusForbidden, errRes)
-
+		response := helper.APIResponse("Only admin can update", http.StatusUnauthorized, "error", nil)
+		return c.JSON(http.StatusUnauthorized, response)
 	}
-	userId := c.Get("user_id").(uint)
-	if userId == 0 {
-		errRes := base.ErrorResponse{
-			Status:  "error",
-			Message: "Bad request",
-			Code:    http.StatusBadRequest,
-		}
-		return c.JSON(http.StatusBadRequest, errRes)
-	}
-	id, _ := strconv.Atoi(c.Param("Id"))
-	fertilizerCatalog := Fertilizer{}
-	c.Bind(&fertilizerCatalog)
 
-	fertilizer := []Fertilizer{}
+	var input Fertilizer
 
-	for i, fertilizers := range fertilizer {
-		if id == fertilizers.Id {
-			fertilizer[i].Id = fertilizerCatalog.Id
-			fertilizer[i].Name = fertilizerCatalog.Name
-			fertilizer[i].Compostition = fertilizerCatalog.Compostition
-		}
+	if err := c.Bind(&input); err != nil {
+		response := helper.APIResponse("Failed to bind input", http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"fertilizer": fertilizer,
-	})
+
+	validate := validator.New()
+	if err := validate.Struct(input); err != nil {
+		errors := helper.FormatValidationError(err)
+		response := helper.APIResponse("Validation error", http.StatusBadRequest, "error", errors)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	response := helper.APIResponse("Plant category updated successfully", http.StatusOK, "success", nil)
+	return c.JSON(http.StatusOK, response)
 }
 
 // Delete a Fertilizer by Id
-func DeleteFertilizer(c echo.Context) error {
-	role := c.Get("role").(string)
-	if role != "admin" {
-		errRes := base.ErrorResponse{
-			Status:  "error",
-			Message: "Forbidden access",
-			Code:    http.StatusForbidden,
-		}
-		return c.JSON(http.StatusForbidden, errRes)
-
-	}
-	userId := c.Get("user_id").(uint)
+func (c *FertilizerController) DeleteFertilizer(ctx echo.Context) error {
+	userId := ctx.Get("user_id").(uint)
 	if userId == 0 {
 		errRes := base.ErrorResponse{
 			Status:  "error",
-			Message: "Bad request",
+			Message: "Id cannot be empty",
 			Code:    http.StatusBadRequest,
 		}
-		return c.JSON(http.StatusBadRequest, errRes)
+		return ctx.JSON(http.StatusBadRequest, errRes)
 	}
-	id, _ := strconv.Atoi(c.Param("Id"))
-
-	fertilizer := []Fertilizer{}
-
-	indexToDelete := -1
-	for i, fertilizers := range fertilizer {
-		if fertilizers.Id == id {
-			indexToDelete = i
-			break
+	err := c.useCase.DeleteFertilizer(userId)
+	if err != nil {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: err.Error(),
+			Code:    http.StatusInternalServerError,
 		}
+		return ctx.JSON(http.StatusInternalServerError, errRes)
 	}
-
-	if indexToDelete != -1 {
-		fertilizer = append(fertilizer[:indexToDelete], fertilizer[indexToDelete+1:]...)
+	res := base.SuccessResponse{
+		Status:  "success",
+		Message: "Fertilizer deleted",
 	}
-
-	return c.NoContent(http.StatusNoContent)
+	return ctx.JSON(http.StatusOK, res)
 }

@@ -275,34 +275,32 @@ func handleCustomizedReminders(db *gorm.DB, useCase UseCase, location *time.Loca
 	}
 
 	for _, reminder := range reminders {
-		if shouldSendReminder(reminder.MyPlant, reminderType) {
-			err := SendCustomReminder(reminder, useCase)
-			if err != nil {
-				fmt.Printf("Error sending %s customized watering reminder: %v\n", reminderType, err)
-				continue
-			}
+		err := SendCustomReminder(reminder, useCase)
+		if err != nil {
+			fmt.Printf("Error sending %s customized watering reminder: %v\n", reminderType, err)
+			continue
+		}
 
-			if !reminder.Recurring {
-				if err := db.Delete(&reminder).Error; err != nil {
-					fmt.Printf("Failed to delete one-time %s reminder: %v\n", reminderType, err)
-				}
+		if !reminder.Recurring {
+			if err := db.Delete(&reminder).Error; err != nil {
+				fmt.Printf("Failed to delete one-time %s reminder: %v\n", reminderType, err)
 			}
 		}
 	}
 }
 
-func shouldSendReminder(myPlant plant.UserPlant, reminderType string) bool {
-	now := time.Now()
-	lastWatered := myPlant.LastWateredAt
+// func shouldSendReminder(myPlant plant.UserPlant, reminderType string) bool {
+// 	now := time.Now()
+// 	lastWatered := myPlant.LastWateredAt
 
-	switch reminderType {
-	case "daily":
-		return now.Sub(lastWatered) >= 24*time.Hour
-	case "weekly":
-		return now.Sub(lastWatered) >= 7*24*time.Hour
-	case "monthly":
-		return now.Sub(lastWatered) >= 30*24*time.Hour
-	default:
-		return false
-	}
-}
+// 	switch reminderType {
+// 	case "daily":
+// 		return now.Sub(lastWatered) >= 24*time.Hour
+// 	case "weekly":
+// 		return now.Sub(lastWatered) >= 7*24*time.Hour
+// 	case "monthly":
+// 		return now.Sub(lastWatered) >= 30*24*time.Hour
+// 	default:
+// 		return false
+// 	}
+// }

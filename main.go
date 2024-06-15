@@ -7,6 +7,7 @@ import (
 	"github.com/OctavianoRyan25/be-agriculture/configs"
 	"github.com/OctavianoRyan25/be-agriculture/handler"
 	"github.com/OctavianoRyan25/be-agriculture/modules/admin"
+	"github.com/OctavianoRyan25/be-agriculture/modules/fertilizer"
 	"github.com/OctavianoRyan25/be-agriculture/modules/notification"
 	"github.com/OctavianoRyan25/be-agriculture/modules/plant"
 	"github.com/OctavianoRyan25/be-agriculture/modules/search"
@@ -96,7 +97,11 @@ func main() {
 	wateringHistoryUseCase := wateringhistory.NewUseCase(wateringHistoryRepo)
 	wateringHistoryController := wateringhistory.NeWateringHistoryController(wateringHistoryUseCase)
 
-	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler, searchController, notificationController, wateringHistoryController)
+	fertilizerRepo := fertilizer.NewRepository(db)
+	fertilizerUseCase := fertilizer.NewUseCase(fertilizerRepo)
+	fertilizerController := fertilizer.NewFertilizerController(fertilizerUseCase)
+
+	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler, searchController, notificationController, wateringHistoryController, fertilizerController)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

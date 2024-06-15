@@ -113,9 +113,23 @@ type UserPlant struct {
 	ID            int       `json:"id" gorm:"primaryKey"`
 	UserID        int       `json:"user_id"`
 	PlantID       int       `json:"plant_id"`
+	CustomizeName string    `json:"customize_name"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
-	LastWateredAt time.Time `json:"last_watered_at"`
-	Plant         Plant     `json:"plant" gorm:"foreignKey:PlantID;references:ID"`
-	User          user.User `json:"user" gorm:"foreignKey:UserID;references:ID"`
+
+	Plant Plant     `json:"plant" gorm:"foreignKey:PlantID;references:ID"`
+	User  user.User `json:"user" gorm:"foreignKey:UserID;references:ID"`
+}
+
+type UserPlantHistory struct {
+	ID            int       `json:"id" gorm:"primaryKey"`
+	UserID        int       `json:"user_id"`
+	PlantID       int       `json:"plant_id"`
+	PlantName     string    `json:"plant_name"`
+	PlantCategory string    `json:"plant_category"`
+	PlantImageURL string    `json:"plant_image_url"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+
+	User user.User `json:"user" gorm:"foreignKey:UserID;references:ID"`
 }
