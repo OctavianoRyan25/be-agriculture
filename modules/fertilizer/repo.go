@@ -39,7 +39,7 @@ func (r *FertilizerRepository) CreateFertilizer(wh *Fertilizer) (*Fertilizer, er
 
 func (r *FertilizerRepository) GetFertilizer(userID uint) ([]Fertilizer, error) {
 	var wh []Fertilizer
-	err := r.db.Preload("Id").Preload("Name").Order("create_at").Where("user_id = ?", userID).Find(&wh).Error
+	err := r.db.Preload("Id").Preload("Name").Preload("Plant").Order("create_at").Where("user_id = ?", userID).Find(&wh).Error
 	if err != nil {
 		return nil, err
 	}
