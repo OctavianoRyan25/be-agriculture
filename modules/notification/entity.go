@@ -11,6 +11,7 @@ type Notification struct {
 	Title     string
 	Body      string
 	UserId    int `gorm:"foreignKey:UserID;references:Id"`
+	PlantId   int `gorm:"foreignKey:PlantId;references:Id"`
 	IsRead    bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
