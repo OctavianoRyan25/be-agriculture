@@ -225,6 +225,7 @@ func NewPlantFAQResponse(faq PlantFAQ) PlantFAQResponse {
 type UserPlantResponse struct {
 	ID        int       `json:"id"`
 	Plant     PlantResponse `json:"plant"`
+	CustomizeName string `json:"customize_name"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -232,6 +233,7 @@ func NewUserPlantResponse(userPlant UserPlant) UserPlantResponse {
 	return UserPlantResponse{
 		ID:        userPlant.ID,
 		Plant:     NewPlantResponse(userPlant.Plant),
+		CustomizeName: userPlant.CustomizeName,
 		CreatedAt: userPlant.CreatedAt,
 	}
 }
@@ -250,3 +252,22 @@ func NewUserPlantResponses(userPlants []UserPlant) map[int][]UserPlantResponse {
 	return responses
 }
 
+type UserPlantHistoryResponse struct {
+	ID        		int       `json:"id"`
+	UserID    		int       `json:"user_id"`
+	PlantName 		string    `json:"plant_name"`
+	PlantCategory string 		`json:"plant_category"`
+	ImageURL  		string    `json:"image_url"`
+	CreatedAt 		time.Time `json:"created_at"`
+}
+
+func NewUserPlantHistoryResponse(userPlantHistory UserPlantHistory) UserPlantHistoryResponse {
+	return UserPlantHistoryResponse{
+		ID:        userPlantHistory.ID,
+		UserID:    userPlantHistory.UserID,
+		PlantName: userPlantHistory.PlantName,
+		PlantCategory: userPlantHistory.PlantCategory,
+		ImageURL:  userPlantHistory.PlantImageURL,
+		CreatedAt: userPlantHistory.CreatedAt,
+	}
+}
