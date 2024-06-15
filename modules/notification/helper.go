@@ -48,8 +48,9 @@ func SendReminder(user user.User, plant plant.Plant, useCase UseCase) error {
 	// Store the notification in the database
 	notification := &Notification{
 		Title:     "Watering Reminder",
-		Body:      fmt.Sprintf("It's time to water your plant: %s", plant.Name),
+		Body:      fmt.Sprintf("Hiii %s, It's time to water your plant: %s", user.Name, plant.Name),
 		UserId:    user.ID,
+		PlantId:   plant.ID,
 		IsRead:    false,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -87,8 +88,9 @@ func SendCustomReminder(reminder CustomizeWateringReminder, useCase UseCase) err
 	user := reminder.MyPlant.User
 	notification := &Notification{
 		Title:     "Customize Watering Reminder",
-		Body:      fmt.Sprintf("It's time to water your plant: %s", reminder.MyPlant.Plant.Name),
+		Body:      fmt.Sprintf("Hiii %s, It's time to water your plant: %s", user.Name, reminder.MyPlant.Plant.Name),
 		UserId:    user.ID,
+		PlantId:   reminder.MyPlant.Plant.ID,
 		IsRead:    false,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
