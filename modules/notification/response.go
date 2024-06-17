@@ -9,6 +9,7 @@ type NotificationResponse struct {
 	Title     string    `json:"title"`
 	Body      string    `json:"body"`
 	UserId    int       `json:"user_id"`
+	PlantId   int       `json:"plant_id"`
 	IsRead    bool      `json:"is_read"`
 	CreatedAt time.Time `json:"created_at"`
 }
