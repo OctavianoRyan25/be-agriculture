@@ -55,6 +55,7 @@ func (c *NotificationController) ReadNotification(ctx echo.Context) error {
 		Body:      notification.Body,
 		UserId:    notification.UserId,
 		IsRead:    notification.IsRead,
+		PlantId:   notification.PlantId,
 		CreatedAt: notification.CreatedAt,
 	}
 
@@ -93,6 +94,7 @@ func (c *NotificationController) GetAllNotifications(ctx echo.Context) error {
 			Body:      v.Body,
 			UserId:    v.UserId,
 			IsRead:    v.IsRead,
+			PlantId:   v.PlantId,
 			CreatedAt: v.CreatedAt,
 		})
 	}
