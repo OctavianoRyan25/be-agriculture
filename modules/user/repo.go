@@ -16,6 +16,7 @@ type Repository interface {
 	Login(*User) (*User, error)
 	GetUserProfile(uint) (*User, error)
 	GetUser(string) (*User, error)
+	ResetPassword(string, string) error
 }
 
 type userRepository struct {
@@ -106,4 +107,20 @@ func (r *userRepository) GetUser(email string) (*User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (r *userRepository) ResetPassword(email, password string) error {
+	var user User
+	err := r.db.Where("email = ?", email).First(&user).Error
+	if err != nil {
+		return err
+	}
+
+	user.Password = password
+	err = r.db.Save(&user).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -35,7 +35,7 @@ func MapLoginRequestToUser(loginRequest *LoginRequest) *User {
 }
 
 func RandomOTP() string {
-	var code [6]byte
+	var code [4]byte
 	_, err := rand.Read(code[:])
 	if err != nil {
 		panic(err) // atau tangani error sesuai kebutuhan

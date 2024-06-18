@@ -28,3 +28,8 @@ type OTPRequest struct {
 	Email string `json:"email" validate:"required,email"`
 	OTP   string `json:"otp" validate:"required"`
 }
+
+type ResetPasswordRequest struct {
+	Email       string `json:"email" validate:"required,email"`
+	NewPassword string `json:"new_password" validate:"required"`
+}

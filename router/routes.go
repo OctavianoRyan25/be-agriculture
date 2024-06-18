@@ -23,6 +23,7 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	group.POST("/login", userController.Login)
 	group.GET("/profile", userController.GetUserProfile, middlewares.Authentication())
 	group.POST("/resendotp", userController.ResendOTP)
+	group.POST("/forgot-password", userController.ResetPassword)
 
 	groupAdmin := e.Group("/api/v1/admin")
 	groupAdmin.POST("/register", adminController.RegisterUser)
@@ -78,7 +79,7 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	group.POST("/create-customize-watering-reminder", notification.CreateCustomizeWateringReminder, middlewares.Authentication())
 	group.POST("/watering-history", wateringhistory.StoreWateringHistory, middlewares.Authentication())
 	group.GET("/watering-history", wateringhistory.GetAllWateringHistories, middlewares.Authentication())
-	
+
 	group.POST("/chatbot", chatbot.NewChatAI().HandleChatCompletion)
 
 	group.GET("/", func(c echo.Context) error {
