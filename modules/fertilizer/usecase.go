@@ -22,20 +22,20 @@ func NewUseCase(repo Repository) *fertilizerUseCase {
 	}
 }
 
-func (uc *fertilizerUseCase) CreateFertilizer(wh *Fertilizer) (*Fertilizer, error) {
-	wh, err := uc.repo.CreateFertilizer(wh)
+func (uc *fertilizerUseCase) CreateFertilizer(f *Fertilizer) (*Fertilizer, error) {
+	f, err := uc.repo.CreateFertilizer(f)
 	if err != nil {
 		return nil, err
 	}
-	return wh, nil
+	return f, nil
 }
 
 func (uc *fertilizerUseCase) GetFertilizer(userID uint) ([]Fertilizer, error) {
-	wh, err := uc.repo.GetFertilizer(userID)
+	f, err := uc.repo.GetFertilizer(userID)
 	if err != nil {
 		return nil, err
 	}
-	return wh, nil
+	return f, nil
 }
 
 func (u *fertilizerUseCase) DeleteFertilizer(userID uint) error {

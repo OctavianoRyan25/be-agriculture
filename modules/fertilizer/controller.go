@@ -49,7 +49,7 @@ func (c *FertilizerController) CreateFertilizer(ctx echo.Context) error {
 		Id: req.Id,
 	}
 
-	wh, err := c.useCase.CreateFertilizer(mapped)
+	f, err := c.useCase.CreateFertilizer(mapped)
 	if err != nil {
 		errRes := base.ErrorResponse{
 			Status:  "error",
@@ -60,10 +60,10 @@ func (c *FertilizerController) CreateFertilizer(ctx echo.Context) error {
 	}
 
 	mappedres := &FertilizerResponse{
-		Id:           wh.Id,
-		Name:         wh.Name,
-		Compostition: wh.Compostition,
-		CreateAt:     wh.CreateAt,
+		Id:           f.Id,
+		Name:         f.Name,
+		Compostition: f.Compostition,
+		CreateAt:     f.CreateAt,
 	}
 
 	res := base.SuccessResponse{
@@ -78,7 +78,7 @@ func (c *FertilizerController) CreateFertilizer(ctx echo.Context) error {
 func (c *FertilizerController) GetFertilizer(ctx echo.Context) error {
 	userID := ctx.Get("Id").(uint)
 
-	wh, err := c.useCase.GetFertilizer(userID)
+	f, err := c.useCase.GetFertilizer(userID)
 	if err != nil {
 		errRes := base.ErrorResponse{
 			Status:  "error",
@@ -89,7 +89,7 @@ func (c *FertilizerController) GetFertilizer(ctx echo.Context) error {
 	}
 
 	var mappedres []FertilizerResponse
-	for _, v := range wh {
+	for _, v := range f {
 		mappedres = append(mappedres, FertilizerResponse{
 			Id:           v.Id,
 			Name:         v.Name,
@@ -110,7 +110,7 @@ func (c *FertilizerController) GetFertilizer(ctx echo.Context) error {
 func (c *FertilizerController) GetFertilizerById(ctx echo.Context) error {
 	userID := ctx.Get("Id").(uint)
 
-	wh, err := c.useCase.GetFertilizer(userID)
+	f, err := c.useCase.GetFertilizer(userID)
 	if err != nil {
 		errRes := base.ErrorResponse{
 			Status:  "error",
@@ -121,7 +121,7 @@ func (c *FertilizerController) GetFertilizerById(ctx echo.Context) error {
 	}
 
 	var mappedres []FertilizerResponse
-	for _, v := range wh {
+	for _, v := range f {
 		mappedres = append(mappedres, FertilizerResponse{
 			Id:           v.Id,
 			Name:         v.Name,
