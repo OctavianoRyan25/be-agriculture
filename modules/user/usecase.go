@@ -19,6 +19,7 @@ type UserUseCase interface {
 	Login(*User) (*User, int, error)
 	GetUserProfile(uint) (*User, int, error)
 	GetUser(string) (*User, int, error)
+	ResetPassword(string, string) (int, error)
 }
 
 type userUseCase struct {
@@ -132,4 +133,12 @@ func (uc *userUseCase) GetUser(email string) (*User, int, error) {
 		return nil, constants.ErrCodeBadRequest, err
 	}
 	return user, constants.CodeSuccess, nil
+}
+
+func (uc *userUseCase) ResetPassword(email, password string) (int, error) {
+	err := uc.repo.ResetPassword(email, password)
+	if err != nil {
+		return constants.ErrCodeBadRequest, err
+	}
+	return constants.CodeSuccess, nil
 }

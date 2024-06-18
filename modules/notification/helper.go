@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
 	firebase "firebase.google.com/go/v4"
+	"firebase.google.com/go/v4/messaging"
 	"github.com/OctavianoRyan25/be-agriculture/modules/plant"
 	"github.com/OctavianoRyan25/be-agriculture/modules/user" // Updated import
 	"github.com/robfig/cron/v3"
@@ -17,7 +19,11 @@ import (
 
 // Initialize Firebase app
 func InitFirebase() *firebase.App {
-	opt := option.WithCredentialsFile("path/to/your-firebase-adminsdk.json")
+	// Production
+	credential := os.Getenv("FIREBASE_CREDENTIAL")
+	opt := option.WithCredentialsJSON([]byte(credential))
+	//Development
+	// opt := option.WithCredentialsFile("agriculture-af713-c7c8068614c1.json")
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		log.Fatalf("error initializing app: %v", err)
@@ -28,22 +34,26 @@ func InitFirebase() *firebase.App {
 // Send reminder notification and store it in the database
 func SendReminder(user user.User, plant plant.Plant, useCase UseCase) error {
 	// Simulating FCM messaging part is commented out
-	/*
-		message := &messaging.Message{
-			Token: user.FCMToken,
-			Notification: &messaging.Notification{
-				Title: "Watering Reminder",
-				Body:  fmt.Sprintf("It's time to water your plant: %s", plant.Name),
-			},
-		}
+	app := InitFirebase()
+	client, err := app.Messaging(context.Background())
+	if err != nil {
+		log.Fatalf("error getting FCM client: %v", err)
+	}
 
-		_, err := client.Send(context.Background(), message)
-		if err != nil {
-			log.Printf("Error sending FCM message: %v", err)
-		} else {
-			fmt.Printf("Reminder sent to %s for watering plant %s\n", user.Email, plant.Name)
-		}
-	*/
+	message := &messaging.Message{
+		Token: user.FCMToken,
+		Notification: &messaging.Notification{
+			Title: "Watering Reminder",
+			Body:  fmt.Sprintf("Hiii %s, It's time to water your plant: %s", user.Name, plant.Name),
+		},
+	}
+
+	_, err = client.Send(context.Background(), message)
+	if err != nil {
+		log.Printf("Error sending FCM message: %v", err)
+	} else {
+		fmt.Printf("Reminder sent to %s for watering plant %s\n", user.Email, plant.Name)
+	}
 
 	// Store the notification in the database
 	notification := &Notification{
@@ -56,7 +66,7 @@ func SendReminder(user user.User, plant plant.Plant, useCase UseCase) error {
 		UpdatedAt: time.Now(),
 	}
 
-	_, err := useCase.StoreNotification(notification)
+	_, err = useCase.StoreNotification(notification)
 	if err != nil {
 		log.Printf("Error storing notification: %v", err)
 		return err
@@ -67,25 +77,31 @@ func SendReminder(user user.User, plant plant.Plant, useCase UseCase) error {
 
 func SendCustomReminder(reminder CustomizeWateringReminder, useCase UseCase) error {
 	// Simulating FCM messaging part is commented out
-	/*
-		message := &messaging.Message{
-			Token: user.FCMToken,
-			Notification: &messaging.Notification{
-				Title: "Watering Reminder",
-				Body:  fmt.Sprintf("It's time to water your plant: %s", plant.Name),
-			},
-		}
+	app := InitFirebase()
+	client, err := app.Messaging(context.Background())
+	if err != nil {
+		log.Fatalf("error getting FCM client: %v", err)
+	}
 
-		_, err := client.Send(context.Background(), message)
-		if err != nil {
-			log.Printf("Error sending FCM message: %v", err)
-		} else {
-			fmt.Printf("Reminder sent to %s for watering plant %s\n", user.Email, plant.Name)
-		}
-	*/
+	user := reminder.MyPlant.User
+	plant := reminder.MyPlant.Plant
+
+	message := &messaging.Message{
+		Token: user.FCMToken,
+		Notification: &messaging.Notification{
+			Title: "Watering Reminder",
+			Body:  fmt.Sprintf("It's time to water your plant: %s", plant.Name),
+		},
+	}
+
+	_, err = client.Send(context.Background(), message)
+	if err != nil {
+		log.Printf("Error sending FCM message: %v", err)
+	} else {
+		fmt.Printf("Reminder sent to %s for watering plant %s\n", user.Email, plant.Name)
+	}
 
 	// Store the notification in the database
-	user := reminder.MyPlant.User
 	notification := &Notification{
 		Title:     "Customize Watering Reminder",
 		Body:      fmt.Sprintf("Hiii %s, It's time to water your plant: %s", user.Name, reminder.MyPlant.Plant.Name),
@@ -96,7 +112,7 @@ func SendCustomReminder(reminder CustomizeWateringReminder, useCase UseCase) err
 		UpdatedAt: time.Now(),
 	}
 
-	_, err := useCase.StoreNotification(notification)
+	_, err = useCase.StoreNotification(notification)
 	if err != nil {
 		log.Printf("Error storing notification: %v", err)
 		return err

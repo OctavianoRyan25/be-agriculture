@@ -282,3 +282,52 @@ func (c *UserController) ResendOTP(ctx echo.Context) error {
 	}
 	return ctx.JSON(code, resSuccess)
 }
+
+func (c *UserController) ResetPassword(ctx echo.Context) error {
+	req := new(ResetPasswordRequest)
+	err := ctx.Bind(&req)
+	if err != nil {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: err.Error(),
+			Code:    http.StatusUnprocessableEntity,
+		}
+		return ctx.JSON(http.StatusUnprocessableEntity, errRes)
+	}
+	validate := validator.New()
+
+	err = validate.Struct(req)
+	if err != nil {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: err.Error(),
+			Code:    http.StatusBadRequest,
+		}
+		return ctx.JSON(http.StatusBadRequest, errRes)
+	}
+
+	user, code, err := c.userUseCase.GetUser(req.Email)
+	if err != nil {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: err.Error(),
+			Code:    code,
+		}
+		return ctx.JSON(code, errRes)
+	}
+	user.Password = HashPass(req.NewPassword)
+	code, err = c.userUseCase.ResetPassword(user.Email, user.Password)
+	if err != nil {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: err.Error(),
+			Code:    code,
+		}
+		return ctx.JSON(code, errRes)
+	}
+	res := base.SuccessResponse{
+		Status:  "success",
+		Message: "Password change successfully",
+	}
+	return ctx.JSON(code, res)
+}
