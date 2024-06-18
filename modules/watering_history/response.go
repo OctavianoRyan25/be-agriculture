@@ -30,3 +30,12 @@ type PlantImageResponse struct {
 	ID       int    `json:"id"`
 	FileName string `json:"file_name"`
 }
+
+type NotificationResponse struct {
+	Id        int           `json:"id"`
+	Title     string        `json:"title"`
+	Body      string        `json:"body"`
+	UserID    int           `json:"user_id"`
+	Plant     PlantResponse `json:"plant"`
+	CreatedAt time.Time     `json:"created_at"`
+}

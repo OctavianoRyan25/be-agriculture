@@ -1,10 +1,13 @@
 package wateringhistory
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Repository interface {
 	StoreWateringHistory(*WateringHistory) (*WateringHistory, error)
 	GetAllWateringHistories(uint) ([]WateringHistory, error)
+	GetLateWateringHistories(uint) (Notification, error)
 }
 
 type wateringHistoryRepository struct {
@@ -37,4 +40,13 @@ func (r *wateringHistoryRepository) GetAllWateringHistories(userID uint) ([]Wate
 		return nil, err
 	}
 	return wh, nil
+}
+
+func (r *wateringHistoryRepository) GetLateWateringHistories(userID uint) (Notification, error) {
+	var notification Notification
+	err := r.db.Preload("Plant").Preload("Plant.PlantImages").Where("user_id = ? AND is_read = ?", userID, false).First(&notification).Error
+	if err != nil {
+		return notification, err
+	}
+	return notification, nil
 }

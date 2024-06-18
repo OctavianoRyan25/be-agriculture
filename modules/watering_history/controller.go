@@ -1,6 +1,7 @@
 package wateringhistory
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/OctavianoRyan25/be-agriculture/base"
@@ -105,6 +106,55 @@ func (c *WateringHistoryController) GetAllWateringHistories(ctx echo.Context) er
 		Status:  "success",
 		Message: "Watering histories fetched",
 		Data:    mappedRes,
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+}
+
+func (c *WateringHistoryController) GetLateWateringHistories(ctx echo.Context) error {
+	userID := ctx.Get("user_id").(uint)
+	if userID == 0 {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: "Bad request",
+			Code:    http.StatusBadRequest,
+		}
+		return ctx.JSON(http.StatusBadRequest, errRes)
+	}
+	role := ctx.Get("role").(string)
+	if role != "user" {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: "Forbidden access",
+			Code:    http.StatusForbidden,
+		}
+		return ctx.JSON(http.StatusForbidden, errRes)
+
+	}
+
+	notification, err := c.useCase.GetLateWateringHistories(userID)
+	if err != nil {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: err.Error(),
+			Code:    http.StatusInternalServerError,
+		}
+		return ctx.JSON(http.StatusInternalServerError, errRes)
+	}
+
+	mappedPlant := MapPlantToPlantResponse(&notification.Plant)
+
+	res := base.SuccessResponse{
+		Status:  "success",
+		Message: "Late watering history fetched",
+		Data: NotificationResponse{
+			Id:        notification.Id,
+			Title:     fmt.Sprintf("Hi there! You Forgot to Water your %s plant", notification.Plant.Name),
+			Body:      "Remember, your plants need water to thrive. Let's water them",
+			Plant:     *mappedPlant,
+			UserID:    notification.UserId,
+			CreatedAt: notification.CreatedAt,
+		},
 	}
 
 	return ctx.JSON(http.StatusOK, res)
