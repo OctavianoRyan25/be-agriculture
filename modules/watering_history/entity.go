@@ -16,3 +16,15 @@ type WateringHistory struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type Notification struct {
+	Id        int `gorm:"primaryKey"`
+	Title     string
+	Body      string
+	UserId    int         `gorm:"foreignKey:UserID;references:ID"`
+	PlantId   int         `gorm:"foreignKey:PlantId;references:ID"`
+	Plant     plant.Plant `gorm:"foreignKey:PlantId;references:ID"`
+	IsRead    bool
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}

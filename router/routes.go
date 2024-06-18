@@ -79,6 +79,7 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	group.POST("/create-customize-watering-reminder", notification.CreateCustomizeWateringReminder, middlewares.Authentication())
 	group.POST("/watering-history", wateringhistory.StoreWateringHistory, middlewares.Authentication())
 	group.GET("/watering-history", wateringhistory.GetAllWateringHistories, middlewares.Authentication())
+	group.GET("/check-watering", wateringhistory.GetLateWateringHistories, middlewares.Authentication())
 
 	group.POST("/chatbot", chatbot.NewChatAI().HandleChatCompletion)
 

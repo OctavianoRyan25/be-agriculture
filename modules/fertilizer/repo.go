@@ -24,26 +24,26 @@ func NewRepository(db *gorm.DB) *FertilizerRepository {
 	}
 }
 
-func (r *FertilizerRepository) CreateFertilizer(wh *Fertilizer) (*Fertilizer, error) {
-	err := r.db.Create(wh).Error
+func (r *FertilizerRepository) CreateFertilizer(f *Fertilizer) (*Fertilizer, error) {
+	err := r.db.Create(f).Error
 	if err != nil {
 		return nil, err
 	}
 
-	err = r.db.Preload("User").Preload("Plant").First(wh, wh.Id).Error
+	err = r.db.Preload("User").Preload("Plant").First(f, f.Id).Error
 	if err != nil {
 		return nil, err
 	}
-	return wh, nil
+	return f, nil
 }
 
 func (r *FertilizerRepository) GetFertilizer(userID uint) ([]Fertilizer, error) {
-	var wh []Fertilizer
-	err := r.db.Preload("Id").Preload("Name").Preload("Plant").Order("create_at").Where("user_id = ?", userID).Find(&wh).Error
+	var f []Fertilizer
+	err := r.db.Preload("Id").Preload("Name").Preload("Plant").Order("create_at").Where("user_id = ?", userID).Find(&f).Error
 	if err != nil {
 		return nil, err
 	}
-	return wh, nil
+	return f, nil
 }
 
 func (r *FertilizerRepository) DeleteFertilizer(userID uint) error {
