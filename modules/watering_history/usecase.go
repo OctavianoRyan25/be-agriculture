@@ -3,6 +3,7 @@ package wateringhistory
 type WateringHistoryUseCase interface {
 	StoreWateringHistory(*WateringHistory) (*WateringHistory, error)
 	GetAllWateringHistories(uint) ([]WateringHistory, error)
+	GetLateWateringHistories(uint) (Notification, error)
 }
 
 type wateringHistoryUseCase struct {
@@ -29,4 +30,12 @@ func (uc *wateringHistoryUseCase) GetAllWateringHistories(userID uint) ([]Wateri
 		return nil, err
 	}
 	return wh, nil
+}
+
+func (uc *wateringHistoryUseCase) GetLateWateringHistories(userID uint) (Notification, error) {
+	notification, err := uc.repo.GetLateWateringHistories(userID)
+	if err != nil {
+		return notification, err
+	}
+	return notification, nil
 }
