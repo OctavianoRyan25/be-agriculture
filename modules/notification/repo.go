@@ -70,7 +70,7 @@ func (r *notificationRepository) CreateCustomizeWateringReminder(reminder *Custo
 	if err != nil {
 		return nil, err
 	}
-	err = r.db.Preload("MyPlant").Preload("MyPlant.Plant").Preload("MyPlant.User").First(reminder).Error
+	err = r.db.Preload("User").Preload("Plant").First(reminder).Error
 	if err != nil {
 		return nil, err
 	}

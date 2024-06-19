@@ -7,6 +7,7 @@ import (
 	"github.com/OctavianoRyan25/be-agriculture/configs"
 	"github.com/OctavianoRyan25/be-agriculture/handler"
 	"github.com/OctavianoRyan25/be-agriculture/modules/admin"
+	"github.com/OctavianoRyan25/be-agriculture/modules/ai"
 	"github.com/OctavianoRyan25/be-agriculture/modules/fertilizer"
 	"github.com/OctavianoRyan25/be-agriculture/modules/notification"
 	"github.com/OctavianoRyan25/be-agriculture/modules/plant"
@@ -101,7 +102,15 @@ func main() {
 	fertilizerUseCase := fertilizer.NewUseCase(fertilizerRepo)
 	fertilizerController := fertilizer.NewFertilizerController(fertilizerUseCase)
 
-	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler, searchController, notificationController, wateringHistoryController, fertilizerController)
+	apiKey := os.Getenv("OPENAI_API_KEY")
+	if apiKey == "" {
+		panic("OPENAI_API_KEY environment variable is not set")
+	}
+
+	aiFertilizerRecommendationService := ai.NewPlantService(apiKey)
+	aiFertilizerRecommendationHandler := handler.NewAIFertilizerRecommendationHandler(aiFertilizerRecommendationService)
+
+	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler, searchController, notificationController, wateringHistoryController, fertilizerController, aiFertilizerRecommendationHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

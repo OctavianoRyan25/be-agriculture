@@ -1,6 +1,8 @@
 package search
 
 import (
+	"errors"
+
 	"github.com/OctavianoRyan25/be-agriculture/modules/plant"
 	"gorm.io/gorm"
 )
@@ -37,12 +39,16 @@ func (r *searchRepo) Search(params PlantSearchParams) ([]plant.Plant, error) {
 	}
 	if params.HarvestDuration != "" {
 		switch params.HarvestDuration {
-		case "less than 30 days":
+		case "less than 1 month":
 			query = query.Where("harvest_duration < ?", 30)
-		case "30-90 days":
+		case "1-3 months":
 			query = query.Where("harvest_duration >= ? AND harvest_duration <= ?", 30, 90)
-		case "greater than 90 days":
+		case "3-6 months":
 			query = query.Where("harvest_duration > ?", 90)
+		case "more than 6 months":
+			query = query.Where("harvest_duration > ?", 180)
+		default:
+			return nil, errors.New("invalid harvest duration")
 		}
 	}
 	if params.IsToxic != nil {

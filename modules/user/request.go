@@ -22,6 +22,7 @@ type CheckEmailRequest struct {
 type LoginRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
+	FCMToken string `json:"fcm_token" validate:"required"`
 }
 
 type OTPRequest struct {

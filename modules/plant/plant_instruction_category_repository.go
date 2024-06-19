@@ -5,6 +5,7 @@ import "gorm.io/gorm"
 type PlantInstructionCategoryRepository interface {
 	FindAll() ([]PlantInstructionCategory, error)
 	FindByID(id int) (PlantInstructionCategory, error)
+	FindInstructionByCategoryID(plantID int, instructionCategoryID int) ([]PlantInstruction, error)
 	Create(category PlantInstructionCategory) (PlantInstructionCategory, error)
 	Update(category PlantInstructionCategory) (PlantInstructionCategory, error)
 	Delete(category PlantInstructionCategory) error
@@ -28,6 +29,12 @@ func (r *plantInstructionCategoryRepository) FindByID(id int) (PlantInstructionC
 	var category PlantInstructionCategory
 	err := r.db.First(&category, id).Error
 	return category, err
+}
+
+func (r *plantInstructionCategoryRepository) FindInstructionByCategoryID(plantID int, instructionCategoryID int) ([]PlantInstruction, error) {
+	var instructions []PlantInstruction
+	err := r.db.Preload("InstructionCategory").Where("plant_id = ? AND instruction_category_id = ?", plantID ,instructionCategoryID).Find(&instructions).Error
+	return instructions, err
 }
 
 func (r *plantInstructionCategoryRepository) Create(category PlantInstructionCategory) (PlantInstructionCategory, error) {

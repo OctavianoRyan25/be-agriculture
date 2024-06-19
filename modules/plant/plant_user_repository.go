@@ -1,6 +1,8 @@
 package plant
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type UserPlantRepository interface {
 	AddUserPlant(userPlant UserPlant) (UserPlant, error)
@@ -18,6 +20,7 @@ type UserPlantRepository interface {
 	UpdateCustomizeName(userPlantID int, customizeName string) error
 	CheckUserPlantExists(userPlantID int) (bool, error)
 	CheckUserPlantExistsForAdd(userID, plantID int) (bool, error)
+	UpdateInstructionCategory(userPlantID int, fieldToUpdate string) error
 }
 
 type userPlantRepository struct {
@@ -26,6 +29,16 @@ type userPlantRepository struct {
 
 func NewUserPlantRepository(db *gorm.DB) UserPlantRepository {
 	return &userPlantRepository{db}
+}
+
+func (r *userPlantRepository) UpdateInstructionCategory(userPlantID int, fieldToUpdate string) error {
+	updateQuery := map[string]interface{}{fieldToUpdate: 1}
+
+	err := r.db.Model(&UserPlant{}).
+		Where("id = ?", userPlantID).
+		Updates(updateQuery).Error
+
+	return err
 }
 
 func (r *userPlantRepository) CheckUserPlantExists(userPlantID int) (bool, error) {

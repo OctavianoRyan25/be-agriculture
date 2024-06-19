@@ -22,8 +22,9 @@ func NewUseCase(notificationRepo Repository) *notificationUseCase {
 
 func (u *notificationUseCase) StoreNotification(notification *Notification) (*Notification, error) {
 	notification.IsRead = false
-	notification.CreatedAt = time.Now()
-	notification.UpdatedAt = time.Now()
+	location, _ := time.LoadLocation("Asia/Jakarta")
+	notification.CreatedAt = time.Now().In(location)
+	notification.UpdatedAt = time.Now().In(location)
 	return u.notificationRepo.StoreNotification(notification)
 }
 

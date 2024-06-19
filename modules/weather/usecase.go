@@ -70,55 +70,55 @@ func (s *weatherService) GetHourlyWeatherByCoordinates(lat, lon float64) ([]Hour
 	apiKey := os.Getenv("OPENWEATHER_API_KEY")
 
 	resp, err := client.R().
-		SetQueryParams(map[string]string{
-			"lat":   fmt.Sprintf("%f", lat),
-			"lon":   fmt.Sprintf("%f", lon),
-			"appid": apiKey,
-			"units": "metric",
-		}).
-		Get("https://pro.openweathermap.org/data/2.5/forecast/hourly")
+        SetQueryParams(map[string]string{
+            "lat":   fmt.Sprintf("%f", lat),
+            "lon":   fmt.Sprintf("%f", lon),
+            "appid": apiKey,
+            "units": "metric",
+        }).
+        Get("https://pro.openweathermap.org/data/2.5/forecast/hourly")
 
-	if err != nil {
-		return nil, err
-	}
+    if err != nil {
+        return nil, err
+    }
 
-	var apiResponse map[string]interface{}
-	if err := json.Unmarshal(resp.Body(), &apiResponse); err != nil {
-		return nil, err
-	}
+    var apiResponse map[string]interface{}
+    if err := json.Unmarshal(resp.Body(), &apiResponse); err != nil {
+        return nil, err
+    }
 
-	if cod, ok := apiResponse["cod"].(string); ok && cod != "200" {
-		return nil, fmt.Errorf("API returned non-200 status code: %s", cod)
-	}
+    if cod, ok := apiResponse["cod"].(string); ok && cod != "200" {
+        return nil, fmt.Errorf("API returned non-200 status code: %s", cod)
+    }
 
-	list := apiResponse["list"].([]interface{})
-	var hourlyWeathers []HourlyWeather
+    list := apiResponse["list"].([]interface{})
+    var hourlyWeathers []HourlyWeather
 
-	for i, item := range list {
-		forecastItem := item.(map[string]interface{})
-		main := forecastItem["main"].(map[string]interface{})
-		weatherDesc := forecastItem["weather"].([]interface{})[0].(map[string]interface{})
-		wind := forecastItem["wind"].(map[string]interface{})
+    for i, item := range list {
+        forecastItem := item.(map[string]interface{})
+        main := forecastItem["main"].(map[string]interface{})
+        weatherDesc := forecastItem["weather"].([]interface{})[0].(map[string]interface{})
+        wind := forecastItem["wind"].(map[string]interface{})
 
-		// Parsing data dari API response
-		hourlyWeather := HourlyWeather{
-			ID:          uint(i + 1),
-			City:        apiResponse["city"].(map[string]interface{})["name"].(string),
-			Timestamp:   time.Unix(int64(forecastItem["dt"].(float64)), 0),
-			Temperature: main["temp"].(float64),
-			RealFeel:    main["feels_like"].(float64),
-			Pressure:    int(main["pressure"].(float64)),
-			Humidity:    int(main["humidity"].(float64)),
-			WindSpeed:   wind["speed"].(float64),
-			Main:        weatherDesc["main"].(string),
-			Description: weatherDesc["description"].(string),
-			Icon:        weatherDesc["icon"].(string),
-		}
+        // Parsing data dari API response
+        hourlyWeather := HourlyWeather{
+            ID:          uint(i + 1),
+            City:        apiResponse["city"].(map[string]interface{})["name"].(string),
+            Timestamp:   time.Unix(int64(forecastItem["dt"].(float64)), 0),
+            Temperature: main["temp"].(float64),
+            RealFeel:    main["feels_like"].(float64),
+            Pressure:    int(main["pressure"].(float64)),
+            Humidity:    int(main["humidity"].(float64)),
+            WindSpeed:   wind["speed"].(float64),
+            Main:        weatherDesc["main"].(string),
+            Description: weatherDesc["description"].(string),
+            Icon:        weatherDesc["icon"].(string),
+        }
 
-		hourlyWeathers = append(hourlyWeathers, hourlyWeather)
-	}
+        hourlyWeathers = append(hourlyWeathers, hourlyWeather)
+    }
 
-	return hourlyWeathers, nil
+    return hourlyWeathers, nil
 }
 
 func (s *weatherService) GetDailyWeatherByCoordinates(lat, lon float64) ([]DailyWeather, error) {
