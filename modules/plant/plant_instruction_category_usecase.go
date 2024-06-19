@@ -3,6 +3,7 @@ package plant
 type PlantInstructionCategoryService interface {
 	FindAll() ([]PlantInstructionCategoryResponse, error)
 	FindByID(id int) (PlantInstructionCategoryResponse, error)
+	FindInstructionByCategoryID(plantID int, instructionCategoryID int) (PlantInstructionsGroupedResponse, error)
 	Create(input PlantInstructionCategoryInput, fileLocation string) (PlantInstructionCategoryResponse, error)
 	Update(id int, input PlantInstructionCategoryInput, imageURL string) (PlantInstructionCategoryResponse, error)
 	Delete(id int) error
@@ -37,6 +38,17 @@ func (s *plantInstructionCategoryService) FindByID(id int) (PlantInstructionCate
 	}
 
 	return NewPlantInstructionCategoryResponse(category), nil
+}
+
+func (s *plantInstructionCategoryService) FindInstructionByCategoryID(plantID int, instructionCategoryID int) (PlantInstructionsGroupedResponse, error) {
+	instructions, err := s.repository.FindInstructionByCategoryID(plantID, instructionCategoryID)
+	if err != nil {
+		return PlantInstructionsGroupedResponse{}, err
+	}
+
+	response := NewPlantInstructionStepResponses(instructions)
+
+	return response, nil
 }
 
 func (s *plantInstructionCategoryService) Create(input PlantInstructionCategoryInput, imageURL string) (PlantInstructionCategoryResponse, error) {

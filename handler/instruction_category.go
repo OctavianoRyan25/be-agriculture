@@ -52,6 +52,21 @@ func (h *PlantInstructionCategoryHandler) GetByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
+func (h *PlantInstructionCategoryHandler) GetInstructionByCategoryID(c echo.Context) error {
+	plantID, _ := strconv.Atoi(c.Param("plant_id"))
+	instructionCategoryID, _ := strconv.Atoi(c.Param("instruction_category_id"))
+
+	instructions, err := h.service.FindInstructionByCategoryID(plantID, instructionCategoryID)
+
+	if err != nil {
+		response := helper.APIResponse("Failed to get instructions", http.StatusInternalServerError, "error", nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	response := helper.APIResponse("Instructions fetched successfully", http.StatusOK, "success", instructions)
+	return c.JSON(http.StatusOK, response)
+}
+
 func (h *PlantInstructionCategoryHandler) Create(c echo.Context) error {
 	var input plant.PlantInstructionCategoryInput
 

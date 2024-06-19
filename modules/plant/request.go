@@ -45,6 +45,11 @@ type UpdatePlantInput struct {
 	PlantImages         []CreatePlantImageInput        `form:"plant_images" validate:"required,dive"`
 }
 
+type UpdateInstructionCategoryInput struct {
+	UserPlantID         int `json:"user_plant_id" validate:"required"`
+	InstructionCategory int `json:"instruction_category" validate:"required,min=1,max=4"`
+}
+
 type CreateWateringScheduleInput struct {
 	WateringFrequency    int    `form:"watering_frequency" validate:"required"`
 	Each                 string `form:"each" validate:"required"`
