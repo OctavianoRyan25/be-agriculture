@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/OctavianoRyan25/be-agriculture/modules/plant"
+	"github.com/OctavianoRyan25/be-agriculture/modules/user"
 )
 
 type Notification struct {
@@ -19,8 +20,10 @@ type Notification struct {
 
 type CustomizeWateringReminder struct {
 	Id        int `gorm:"primaryKey"`
-	MyPlantId int `gorm:"foreignKey:MyPlantId;references:Id"`
-	MyPlant   plant.UserPlant
+	UserId    int `gorm:"foreignKey:UserID;references:ID"`
+	User      user.User
+	PlantId   int `gorm:"foreignKey:PlantId;references:ID"`
+	Plant     plant.Plant
 	Time      string
 	Recurring bool
 	Type      string // "daily", "weekly", "monthly", "yearly

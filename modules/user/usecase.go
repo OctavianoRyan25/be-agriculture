@@ -3,6 +3,7 @@ package user
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"html/template"
 	"path/filepath"
 	"time"
@@ -109,6 +110,7 @@ func (uc *userUseCase) VerifyEmail(email, otp string) (int, error) {
 }
 
 func (uc *userUseCase) Login(user *User) (*User, int, error) {
+	request_fcm := user.FCMToken
 	user, err := uc.repo.Login(user)
 	if err != nil {
 		return nil, constants.ErrCodeBadRequest, err
@@ -116,6 +118,16 @@ func (uc *userUseCase) Login(user *User) (*User, int, error) {
 	if !user.Is_Active {
 		return nil, constants.ErrCodeEmailNotValidatedYet, errors.New(constants.ErrEmailNotValidatedYet)
 	}
+	response_fcm := user.FCMToken
+	fmt.Println("FCM token changed")
+	if request_fcm != response_fcm {
+		user.FCMToken = request_fcm
+		err = uc.repo.UpdateFCMToken(uint(user.ID), user.FCMToken)
+		if err != nil {
+			return nil, constants.ErrCodeBadRequest, err
+		}
+	}
+	fmt.Println("FCM token updated")
 	return user, constants.CodeSuccess, nil
 }
 

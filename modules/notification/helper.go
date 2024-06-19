@@ -52,7 +52,7 @@ func SendReminder(user user.User, plant plant.Plant, useCase UseCase) error {
 	if err != nil {
 		log.Printf("Error sending FCM message: %v", err)
 	} else {
-		fmt.Printf("Reminder sent to %s for watering plant %s\n", user.Email, plant.Name)
+		fmt.Printf("Reminder have pushed to %s for watering plant %s\n", user.Email, plant.Name)
 	}
 
 	// Store the notification in the database
@@ -83,8 +83,8 @@ func SendCustomReminder(reminder CustomizeWateringReminder, useCase UseCase) err
 		log.Fatalf("error getting FCM client: %v", err)
 	}
 
-	user := reminder.MyPlant.User
-	plant := reminder.MyPlant.Plant
+	user := reminder.User
+	plant := reminder.Plant
 
 	message := &messaging.Message{
 		Token: user.FCMToken,
@@ -98,15 +98,15 @@ func SendCustomReminder(reminder CustomizeWateringReminder, useCase UseCase) err
 	if err != nil {
 		log.Printf("Error sending FCM message: %v", err)
 	} else {
-		fmt.Printf("Reminder sent to %s for watering plant %s\n", user.Email, plant.Name)
+		fmt.Printf("Reminder have pushed to %s for watering plant %s\n", user.Email, plant.Name)
 	}
 
 	// Store the notification in the database
 	notification := &Notification{
 		Title:     "Customize Watering Reminder",
-		Body:      fmt.Sprintf("Hiii %s, It's time to water your plant: %s", user.Name, reminder.MyPlant.Plant.Name),
+		Body:      fmt.Sprintf("Hiii %s, It's time to water your plant: %s", user.Name, reminder.Plant.Name),
 		UserId:    user.ID,
-		PlantId:   reminder.MyPlant.Plant.ID,
+		PlantId:   reminder.Plant.ID,
 		IsRead:    false,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -279,7 +279,7 @@ func handleCustomizedReminders(db *gorm.DB, useCase UseCase, location *time.Loca
 	currentTime := time.Now().In(location)
 	formattedTime := currentTime.Format("15:04")
 
-	err := db.Preload("MyPlant").Preload("MyPlant.User").Preload("MyPlant.Plant").
+	err := db.Preload("User").Preload("Plant").
 		Where("type = ? AND time = ?", reminderType, formattedTime).
 		Find(&reminders).Error
 	if err != nil {
@@ -307,18 +307,32 @@ func handleCustomizedReminders(db *gorm.DB, useCase UseCase, location *time.Loca
 	}
 }
 
-// func shouldSendReminder(myPlant plant.UserPlant, reminderType string) bool {
-// 	now := time.Now()
-// 	lastWatered := myPlant.LastWateredAt
+func MapPlantToPlantResponse(plant *plant.Plant) *PlantResponse {
+	return &PlantResponse{
+		ID:               plant.ID,
+		Name:             plant.Name,
+		Description:      plant.Description,
+		IsToxic:          plant.IsToxic,
+		HarvestDuration:  plant.HarvestDuration,
+		Sunlight:         plant.Sunlight,
+		PlantingTime:     plant.PlantingTime,
+		ClimateCondition: plant.ClimateCondition,
+		PlantImage:       MapPlantImagesToPlantImageResponses(plant.PlantImages),
+		CreatedAt:        plant.CreatedAt,
+	}
+}
 
-// 	switch reminderType {
-// 	case "daily":
-// 		return now.Sub(lastWatered) >= 24*time.Hour
-// 	case "weekly":
-// 		return now.Sub(lastWatered) >= 7*24*time.Hour
-// 	case "monthly":
-// 		return now.Sub(lastWatered) >= 30*24*time.Hour
-// 	default:
-// 		return false
-// 	}
-// }
+func MapPlantImagesToPlantImageResponses(images []plant.PlantImage) []PlantImageResponse {
+	var plantImageResponses []PlantImageResponse
+
+	for _, image := range images {
+		if image.IsPrimary == 1 {
+			plantImageResponses = append(plantImageResponses, PlantImageResponse{
+				ID:       image.ID,
+				FileName: image.FileName,
+			})
+		}
+	}
+
+	return plantImageResponses
+}
