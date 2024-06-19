@@ -15,7 +15,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func InitRoutes(e *echo.Echo, userController *user.UserController, adminController *admin.AdminController, plantCategoryHandler *handler.PlantCategoryHandler, plantHandler *handler.PlantHandler, plantUserHandler *handler.UserPlantHandler, weatherHandler *handler.WeatherHandler, plantInstructionCategoryHandler *handler.PlantInstructionCategoryHandler, plantProgressHandler *handler.PlantProgressHandler, search *search.SearchController, notification *notification.NotificationController, wateringhistory *wateringhistory.WateringHistoryController, fertilizer *fertilizer.FertilizerController) {
+func InitRoutes(e *echo.Echo, userController *user.UserController, adminController *admin.AdminController, plantCategoryHandler *handler.PlantCategoryHandler, plantHandler *handler.PlantHandler, plantUserHandler *handler.UserPlantHandler, weatherHandler *handler.WeatherHandler, plantInstructionCategoryHandler *handler.PlantInstructionCategoryHandler, plantProgressHandler *handler.PlantProgressHandler, search *search.SearchController, notification *notification.NotificationController, wateringhistory *wateringhistory.WateringHistoryController, fertilizer *fertilizer.FertilizerController, aiFertilizer *handler.AIFertilizerRecommendationHandler) {
 	group := e.Group("/api/v1")
 	group.POST("/register", userController.RegisterUser)
 	group.POST("/check-email", userController.CheckEmail)
@@ -85,6 +85,8 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	group.GET("/check-watering", wateringhistory.GetLateWateringHistories, middlewares.Authentication())
 
 	group.POST("/chatbot", chatbot.NewChatAI().HandleChatCompletion)
+
+	group.GET("/recommend-fertilizer", aiFertilizer.GetFertilizerRecommendation)
 
 	group.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
