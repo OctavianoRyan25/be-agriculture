@@ -133,6 +133,7 @@ func (c *NotificationController) DeleteAllNotifications(ctx echo.Context) error 
 }
 
 func (c *NotificationController) CreateCustomizeWateringReminder(ctx echo.Context) error {
+	UserID := ctx.Get("user_id").(uint)
 	reminder := new(CustomizeWateringReminderRequest)
 	if err := ctx.Bind(reminder); err != nil {
 		errRes := base.ErrorResponse{
@@ -143,7 +144,8 @@ func (c *NotificationController) CreateCustomizeWateringReminder(ctx echo.Contex
 		return ctx.JSON(http.StatusBadRequest, errRes)
 	}
 	reminderModel := &CustomizeWateringReminder{
-		MyPlantId: reminder.MyPlantId,
+		PlantId:   reminder.PlantID,
+		UserId:    int(UserID),
 		Time:      reminder.Time,
 		Recurring: reminder.Recurring,
 		Type:      reminder.Type,
@@ -159,7 +161,10 @@ func (c *NotificationController) CreateCustomizeWateringReminder(ctx echo.Contex
 	}
 	mapped := &CustomizeWateringReminderResponse{
 		Id:        reminderModel.Id,
-		MyPlantID: reminderModel.MyPlantId,
+		PlantID:   reminderModel.PlantId,
+		Plant:     *MapPlantToPlantResponse(&reminderModel.Plant),
+		UserID:    reminderModel.UserId,
+		User:      reminderModel.User,
 		Time:      reminderModel.Time,
 		Recurring: reminderModel.Recurring,
 		Type:      reminderModel.Type,

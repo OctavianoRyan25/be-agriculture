@@ -31,6 +31,7 @@ func MapLoginRequestToUser(loginRequest *LoginRequest) *User {
 	return &User{
 		Email:    loginRequest.Email,
 		Password: loginRequest.Password,
+		FCMToken: loginRequest.FCMToken,
 	}
 }
 

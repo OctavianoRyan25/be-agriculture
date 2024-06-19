@@ -1,5 +1,7 @@
 package wateringhistory
 
+import "time"
+
 type WateringHistoryUseCase interface {
 	StoreWateringHistory(*WateringHistory) (*WateringHistory, error)
 	GetAllWateringHistories(uint) ([]WateringHistory, error)
@@ -17,6 +19,9 @@ func NewUseCase(repo Repository) *wateringHistoryUseCase {
 }
 
 func (uc *wateringHistoryUseCase) StoreWateringHistory(wh *WateringHistory) (*WateringHistory, error) {
+	location, _ := time.LoadLocation("Asia/Jakarta")
+	wh.CreatedAt = time.Now().In(location)
+	wh.UpdatedAt = time.Now().In(location)
 	wh, err := uc.repo.StoreWateringHistory(wh)
 	if err != nil {
 		return nil, err

@@ -271,3 +271,47 @@ func NewUserPlantHistoryResponse(userPlantHistory UserPlantHistory) UserPlantHis
 		CreatedAt: userPlantHistory.CreatedAt,
 	}
 }
+
+type PlantInstructionStepResponse struct {
+	ID             int    `json:"id"`
+	StepNumber     int    `json:"step_number"`
+	StepTitle      string `json:"step_title"`
+	StepDescription string `json:"step_description"`
+	StepImageURL   string `json:"step_image_url"`
+}
+
+type PlantInstructionsGroupedResponse struct {
+	PlantID             int                          `json:"plant_id"`
+	InstructionCategory PlantInstructionCategoryResponse `json:"instruction_category"`
+	Steps               []PlantInstructionStepResponse   `json:"steps"`
+}
+
+func NewPlantInstructionStepResponses(instructions []PlantInstruction) PlantInstructionsGroupedResponse {
+	if len(instructions) == 0 {
+		return PlantInstructionsGroupedResponse{}
+	}
+
+	firstInstruction := instructions[0]
+
+	groupedResponse := PlantInstructionsGroupedResponse{
+		PlantID: firstInstruction.PlantID,
+		InstructionCategory: PlantInstructionCategoryResponse{
+			ID:          firstInstruction.InstructionCategory.ID,
+			Name:        firstInstruction.InstructionCategory.Name,
+			Description: firstInstruction.InstructionCategory.Description,
+			ImageURL:    firstInstruction.InstructionCategory.ImageURL,
+		},
+	}
+
+	for _, instruction := range instructions {
+		groupedResponse.Steps = append(groupedResponse.Steps, PlantInstructionStepResponse{
+			ID:             instruction.ID,
+			StepNumber:     instruction.StepNumber,
+			StepTitle:      instruction.StepTitle,
+			StepDescription: instruction.StepDescription,
+			StepImageURL:   instruction.StepImageURL,
+		})
+	}
+
+	return groupedResponse
+}

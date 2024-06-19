@@ -17,6 +17,7 @@ type Repository interface {
 	GetUserProfile(uint) (*User, error)
 	GetUser(string) (*User, error)
 	ResetPassword(string, string) error
+	UpdateFCMToken(uint, string) error
 }
 
 type userRepository struct {
@@ -117,6 +118,22 @@ func (r *userRepository) ResetPassword(email, password string) error {
 	}
 
 	user.Password = password
+	err = r.db.Save(&user).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *userRepository) UpdateFCMToken(id uint, fcmToken string) error {
+	var user User
+	err := r.db.Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return err
+	}
+
+	user.FCMToken = fcmToken
 	err = r.db.Save(&user).Error
 	if err != nil {
 		return err
