@@ -7,10 +7,12 @@ import (
 	"github.com/OctavianoRyan25/be-agriculture/configs"
 	"github.com/OctavianoRyan25/be-agriculture/handler"
 	"github.com/OctavianoRyan25/be-agriculture/modules/admin"
+	"github.com/OctavianoRyan25/be-agriculture/modules/fertilizer"
 	"github.com/OctavianoRyan25/be-agriculture/modules/notification"
 	"github.com/OctavianoRyan25/be-agriculture/modules/plant"
 	"github.com/OctavianoRyan25/be-agriculture/modules/search"
 	"github.com/OctavianoRyan25/be-agriculture/modules/user"
+	wateringhistory "github.com/OctavianoRyan25/be-agriculture/modules/watering_history"
 	"github.com/OctavianoRyan25/be-agriculture/modules/weather"
 	"github.com/OctavianoRyan25/be-agriculture/router"
 	"github.com/cloudinary/cloudinary-go/v2"
@@ -88,8 +90,18 @@ func main() {
 
 	// Schedule watering reminders
 	notification.StartScheduler(db, notificationUseCase)
+	notification.StartSchedulerForCustomizeWateringReminder(db, notificationUseCase)
 
-	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler, searchController, notificationController)
+	// Initialize the watering history repository and use case
+	wateringHistoryRepo := wateringhistory.NewRepository(db)
+	wateringHistoryUseCase := wateringhistory.NewUseCase(wateringHistoryRepo)
+	wateringHistoryController := wateringhistory.NeWateringHistoryController(wateringHistoryUseCase)
+
+	fertilizerRepo := fertilizer.NewRepository(db)
+	fertilizerUseCase := fertilizer.NewUseCase(fertilizerRepo)
+	fertilizerController := fertilizer.NewFertilizerController(fertilizerUseCase)
+
+	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler, searchController, notificationController, wateringHistoryController, fertilizerController)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
@@ -97,6 +109,7 @@ func main() {
 func initCloudinary() (*cloudinary.Cloudinary, error) {
 	//Production
 	cloudinaryURL := os.Getenv("CLOUDINARY_URL")
+	// cloudinaryURL := "cloudinary://key:secret@cloud_name"
 	cloudinary, err := cloudinary.NewFromURL(cloudinaryURL)
 	if err != nil {
 		return nil, err

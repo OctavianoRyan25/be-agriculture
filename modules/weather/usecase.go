@@ -24,7 +24,7 @@ func NewWeatherService() WeatherService {
 func (s *weatherService) GetCurrentWeatherByCoordinates(lat, lon float64) (*Weather, error) {
 	client := resty.New()
 	apiKey := os.Getenv("OPENWEATHER_API_KEY")
-resp, err := client.R().
+	resp, err := client.R().
 		SetQueryParams(map[string]string{
 			"lat":   fmt.Sprintf("%f", lat),
 			"lon":   fmt.Sprintf("%f", lon),
@@ -127,64 +127,64 @@ func (s *weatherService) GetDailyWeatherByCoordinates(lat, lon float64) ([]Daily
 	apiKey := os.Getenv("OPENWEATHER_API_KEY")
 
 	resp, err := client.R().
-        SetQueryParams(map[string]string{
-            "lat":   fmt.Sprintf("%f", lat),
-            "lon":   fmt.Sprintf("%f", lon),
-            "appid": apiKey,
-            "units": "metric",
-            "cnt":   "7",
-        }).
-        Get(fmt.Sprintf("http://api.openweathermap.org/data/2.5/forecast/daily?lat=%f&lon=%f&cnt=7&appid=%s", lat, lon, apiKey))
+		SetQueryParams(map[string]string{
+			"lat":   fmt.Sprintf("%f", lat),
+			"lon":   fmt.Sprintf("%f", lon),
+			"appid": apiKey,
+			"units": "metric",
+			"cnt":   "7",
+		}).
+		Get(fmt.Sprintf("http://api.openweathermap.org/data/2.5/forecast/daily?lat=%f&lon=%f&cnt=7&appid=%s", lat, lon, apiKey))
 
-    if err != nil {
-        return nil, err
-    }
+	if err != nil {
+		return nil, err
+	}
 
 	var apiResponse map[string]interface{}
 	if err := json.Unmarshal(resp.Body(), &apiResponse); err != nil {
 		return nil, err
 	}
 
-    if cod, ok := apiResponse["cod"].(string); ok && cod != "200" {
-        return nil, fmt.Errorf("API returned non-200 status code: %s", cod)
-    }
+	if cod, ok := apiResponse["cod"].(string); ok && cod != "200" {
+		return nil, fmt.Errorf("API returned non-200 status code: %s", cod)
+	}
 
 	list := apiResponse["list"].([]interface{})
 	var dailyWeathers []DailyWeather
 
-    for i, item := range list {
-        forecastItem := item.(map[string]interface{})
-        temp := forecastItem["temp"].(map[string]interface{})
-        feelsLike := forecastItem["feels_like"].(map[string]interface{})
-        weatherDesc := forecastItem["weather"].([]interface{})[0].(map[string]interface{})
+	for i, item := range list {
+		forecastItem := item.(map[string]interface{})
+		temp := forecastItem["temp"].(map[string]interface{})
+		feelsLike := forecastItem["feels_like"].(map[string]interface{})
+		weatherDesc := forecastItem["weather"].([]interface{})[0].(map[string]interface{})
 
-        // Handle conversion from interface{} to appropriate types
-        var sunrise int64
-        if sysSunrise, ok := forecastItem["sunrise"].(float64); ok {
-            sunrise = int64(sysSunrise)
-        } else if sysSunrise, ok := forecastItem["sunrise"].(int64); ok {
-            sunrise = sysSunrise
-        } else if sysSunrise, ok := forecastItem["sunrise"].(int); ok {
-            sunrise = int64(sysSunrise)
-        }
+		// Handle conversion from interface{} to appropriate types
+		var sunrise int64
+		if sysSunrise, ok := forecastItem["sunrise"].(float64); ok {
+			sunrise = int64(sysSunrise)
+		} else if sysSunrise, ok := forecastItem["sunrise"].(int64); ok {
+			sunrise = sysSunrise
+		} else if sysSunrise, ok := forecastItem["sunrise"].(int); ok {
+			sunrise = int64(sysSunrise)
+		}
 
-        dailyWeather := DailyWeather{
-            ID:          uint(i + 1),
-            City:        apiResponse["city"].(map[string]interface{})["name"].(string), // Using city name
-            Date:        time.Unix(int64(forecastItem["dt"].(float64)), 0),
-            Temperature: temp["day"].(float64),
-            RealFeel:    feelsLike["day"].(float64),
-            Pressure:    int(forecastItem["pressure"].(float64)),
-            Humidity:    int(forecastItem["humidity"].(float64)),
-            WindSpeed:   forecastItem["speed"].(float64),
-            Main:        weatherDesc["main"].(string),
-            Description: weatherDesc["description"].(string),
-            Sunrise:     sunrise,
-            Icon:        weatherDesc["icon"].(string),
-        }
+		dailyWeather := DailyWeather{
+			ID:          uint(i + 1),
+			City:        apiResponse["city"].(map[string]interface{})["name"].(string), // Using city name
+			Date:        time.Unix(int64(forecastItem["dt"].(float64)), 0),
+			Temperature: temp["day"].(float64),
+			RealFeel:    feelsLike["day"].(float64),
+			Pressure:    int(forecastItem["pressure"].(float64)),
+			Humidity:    int(forecastItem["humidity"].(float64)),
+			WindSpeed:   forecastItem["speed"].(float64),
+			Main:        weatherDesc["main"].(string),
+			Description: weatherDesc["description"].(string),
+			Sunrise:     sunrise,
+			Icon:        weatherDesc["icon"].(string),
+		}
 
 		dailyWeathers = append(dailyWeathers, dailyWeather)
 	}
 
-    return dailyWeathers, nil
+	return dailyWeathers, nil
 }

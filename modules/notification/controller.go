@@ -55,6 +55,7 @@ func (c *NotificationController) ReadNotification(ctx echo.Context) error {
 		Body:      notification.Body,
 		UserId:    notification.UserId,
 		IsRead:    notification.IsRead,
+		PlantId:   notification.PlantId,
 		CreatedAt: notification.CreatedAt,
 	}
 
@@ -93,6 +94,7 @@ func (c *NotificationController) GetAllNotifications(ctx echo.Context) error {
 			Body:      v.Body,
 			UserId:    v.UserId,
 			IsRead:    v.IsRead,
+			PlantId:   v.PlantId,
 			CreatedAt: v.CreatedAt,
 		})
 	}
@@ -128,4 +130,45 @@ func (c *NotificationController) DeleteAllNotifications(ctx echo.Context) error 
 		Message: "Notifications deleted",
 	}
 	return ctx.JSON(http.StatusOK, res)
+}
+
+func (c *NotificationController) CreateCustomizeWateringReminder(ctx echo.Context) error {
+	reminder := new(CustomizeWateringReminderRequest)
+	if err := ctx.Bind(reminder); err != nil {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: err.Error(),
+			Code:    http.StatusBadRequest,
+		}
+		return ctx.JSON(http.StatusBadRequest, errRes)
+	}
+	reminderModel := &CustomizeWateringReminder{
+		MyPlantId: reminder.MyPlantId,
+		Time:      reminder.Time,
+		Recurring: reminder.Recurring,
+		Type:      reminder.Type,
+	}
+	_, err := c.UseCase.CreateCustomizeWateringReminder(reminderModel)
+	if err != nil {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: err.Error(),
+			Code:    http.StatusInternalServerError,
+		}
+		return ctx.JSON(http.StatusInternalServerError, errRes)
+	}
+	mapped := &CustomizeWateringReminderResponse{
+		Id:        reminderModel.Id,
+		MyPlantID: reminderModel.MyPlantId,
+		Time:      reminderModel.Time,
+		Recurring: reminderModel.Recurring,
+		Type:      reminderModel.Type,
+		CreatedAt: reminderModel.CreatedAt,
+	}
+	res := base.SuccessResponse{
+		Status:  "success",
+		Message: "Customize watering reminder created",
+		Data:    mapped,
+	}
+	return ctx.JSON(http.StatusCreated, res)
 }
