@@ -44,15 +44,15 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	groupAdmin.POST("/plants/instructions/categories", plantInstructionCategoryHandler.Create, middlewares.Authentication())
 	groupAdmin.PUT("/plants/instructions/categories/:id", plantInstructionCategoryHandler.Update, middlewares.Authentication())
 	groupAdmin.DELETE("/plants/instructions/categories/:id", plantInstructionCategoryHandler.Delete, middlewares.Authentication())
-	
-	group.GET("/plants", plantHandler.GetAll)            
-	group.GET("/plants/:id", plantHandler.GetByID)        
+
+	group.GET("/plants", plantHandler.GetAll)
+	group.GET("/plants/:id", plantHandler.GetByID)
 	group.GET("/plants/search", plantHandler.SearchPlantsByName)
 	group.GET("/plants/category/:category_id", plantHandler.GetPlantsByCategoryID)
-	group.GET("/plants/recommendations", plantHandler.GetRecommendations, middlewares.Authentication())        
+	group.GET("/plants/recommendations", plantHandler.GetRecommendations, middlewares.Authentication())
 	group.GET("/plants/instructions/:plant_id/:instruction_category_id", plantInstructionCategoryHandler.GetInstructionByCategoryID)
-	groupAdmin.POST("/plants", plantHandler.Create, middlewares.Authentication())           
-	groupAdmin.PUT("/plants/:id", plantHandler.Update, middlewares.Authentication())         
+	groupAdmin.POST("/plants", plantHandler.Create, middlewares.Authentication())
+	groupAdmin.PUT("/plants/:id", plantHandler.Update, middlewares.Authentication())
 	groupAdmin.DELETE("/plants/:id", plantHandler.Delete, middlewares.Authentication())
 
 	group.GET("/my/plants/:user_id", plantUserHandler.GetUserPlants, middlewares.Authentication())
@@ -62,7 +62,6 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	group.POST("/my/plants/history", plantUserHandler.AddUserPlantHistory, middlewares.Authentication())
 	group.GET("/my/plants/history", plantUserHandler.GetUserPlantHistoryByUserID, middlewares.Authentication())
 	group.PUT("/my/plants/update-instructions", plantUserHandler.UpdateInstructionCategory, middlewares.Authentication())
-
 
 	group.GET("/weather/current", weatherHandler.GetCurrentWeather, middlewares.Authentication())
 	group.GET("/weather/hourly", weatherHandler.GetHourlyWeather, middlewares.Authentication())
@@ -87,6 +86,8 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	group.POST("/chatbot", chatbot.NewChatAI().HandleChatCompletion)
 
 	group.GET("/recommend-fertilizer", aiFertilizer.GetFertilizerRecommendation)
+
+	group.GET("/recommend-plants", aiFertilizer.GetPlantingRecommendation)
 
 	group.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
