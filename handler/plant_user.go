@@ -18,6 +18,33 @@ func NewUserPlantHandler(service plant.UserPlantService) *UserPlantHandler {
     return &UserPlantHandler{service}
 }
 
+func (h *UserPlantHandler) UpdateInstructionCategory(c echo.Context) error {
+	var request plant.UpdateInstructionCategoryInput
+	if err := c.Bind(&request); err != nil {
+		response := helper.APIResponse("Invalid request", http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(request); err != nil {
+		errors := helper.FormatValidationError(err)
+		response := helper.APIResponse(errors[0], http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	err := h.service.UpdateInstructionCategory(plant.UpdateInstructionCategoryInput{
+		UserPlantID:        request.UserPlantID,
+		InstructionCategory: request.InstructionCategory,
+	})
+	if err != nil {
+		response := helper.APIResponse(err.Error(), http.StatusBadRequest, "error", nil)
+		return c.JSON(http.StatusBadRequest, response)
+	}
+
+	response := helper.APIResponse("Instruction category updated successfully", http.StatusOK, "success", nil)
+	return c.JSON(http.StatusOK, response)
+}
+
 func (h *UserPlantHandler) AddUserPlant(c echo.Context) error {
 	var request plant.AddUserPlantInput
 	if err := c.Bind(&request); err != nil {

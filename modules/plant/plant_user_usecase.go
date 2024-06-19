@@ -18,6 +18,7 @@ type UserPlantService interface {
 	CheckUserPlantExists(userPlantID int) (bool, error)
 	UpdateCustomizeName(userPlantID int, customizeName string) (UserPlantResponse, error)
 	CheckUserPlantExistsForAdd(userID, plantID int) (bool, error)
+	UpdateInstructionCategory(input UpdateInstructionCategoryInput) error
 }
 
 type userPlantService struct {
@@ -26,6 +27,30 @@ type userPlantService struct {
 
 func NewUserPlantService(repository UserPlantRepository) UserPlantService {
 	return &userPlantService{repository}
+}
+
+func (s *userPlantService) UpdateInstructionCategory(input UpdateInstructionCategoryInput) error {
+	userPlant, err := s.repository.GetUserPlantByID(input.UserPlantID)
+	if err != nil || userPlant.ID == 0 {
+		return errors.New("user plant not found")
+	}
+
+	var fieldToUpdate string
+	switch input.InstructionCategory {
+	case 1:
+		fieldToUpdate = "instruction_category1"
+	case 2:
+		fieldToUpdate = "instruction_category2"
+	case 3:
+		fieldToUpdate = "instruction_category3"
+	case 4:
+		fieldToUpdate = "instruction_category4"
+	default:
+		return errors.New("invalid instruction category")
+	}
+
+	err = s.repository.UpdateInstructionCategory(input.UserPlantID, fieldToUpdate)
+	return err
 }
 
 func (s *userPlantService) CheckPlantExists(plantID int) (bool, error) {
