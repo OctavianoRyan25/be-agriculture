@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -13,7 +14,7 @@ import (
 
 var (
 	oauthConfigforAndro = &oauth2.Config{
-		ClientID:     "355159605133-claot9pia5m9o2b37g1klcb6ai4f784l.apps.googleusercontent.com",
+		ClientID:     os.Getenv("GOOGLE_CLIENT_ID_FOR_ANDRO"),
 		ClientSecret: "",
 		RedirectURL:  "https://be-agriculture-awh2j5ffyq-uc.a.run.app/api/v1/auth-andro/google/callback",
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},

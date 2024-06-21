@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/OctavianoRyan25/be-agriculture/utils/helper"
@@ -14,8 +15,8 @@ import (
 
 var (
 	oauthConfig = &oauth2.Config{
-		ClientID:     "355159605133-e1c0bul0ekhakh25c1d9rtcj9pnsdcej.apps.googleusercontent.com",
-		ClientSecret: "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",
+		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 		RedirectURL:  "https://be-agriculture-awh2j5ffyq-uc.a.run.app/api/v1/auth/google/callback",
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
 		Endpoint:     google.Endpoint,
