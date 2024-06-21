@@ -135,13 +135,13 @@ func StartScheduler(db *gorm.DB, useCase UseCase) {
 	// 	handlerRegularReminder(db, useCase, location, "daily")
 	// })
 	c.AddFunc("0 * * * *", func() {
-		handlerRegularReminder(db, useCase, location, "daily")
+		handlerRegularReminder(db, useCase, location, "Day")
 	})
 	c.AddFunc("0 0 * * 0", func() {
-		handlerRegularReminder(db, useCase, location, "weekly")
+		handlerRegularReminder(db, useCase, location, "Week")
 	})
 	c.AddFunc("0 0 1 * *", func() {
-		handlerRegularReminder(db, useCase, location, "monthly")
+		handlerRegularReminder(db, useCase, location, "Month")
 	})
 	c.Start()
 }
@@ -259,15 +259,15 @@ func StartSchedulerForCustomizeWateringReminder(db *gorm.DB, useCase UseCase) {
 	// 	handleCustomizedReminders(db, useCase, location, "daily")
 	// })
 	c.AddFunc("0 * * * *", func() {
-		handleCustomizedReminders(db, useCase, location, "daily")
+		handleCustomizedReminders(db, useCase, location, "Day")
 	})
 
 	c.AddFunc("0 0 * * 0", func() {
-		handleCustomizedReminders(db, useCase, location, "weekly")
+		handleCustomizedReminders(db, useCase, location, "Week")
 	})
 
 	c.AddFunc("0 0 1 * *", func() {
-		handleCustomizedReminders(db, useCase, location, "monthly")
+		handleCustomizedReminders(db, useCase, location, "Month")
 	})
 
 	c.Start()
