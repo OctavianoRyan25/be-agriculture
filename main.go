@@ -74,6 +74,10 @@ func main() {
 	plantUserService := plant.NewUserPlantService(plantUserRepository)
 	plantUserHandler := handler.NewUserPlantHandler(plantUserService)
 
+	plantEarliestWateringRepository  := plant.NewPlantEarliestWateringRepository(db)
+    plantEarliestWateringService := plant.NewPlantEarliestWateringService(plantEarliestWateringRepository)
+    plantEarliestWateringHandler := handler.NewPlantEarliestWateringHandler(plantEarliestWateringService, cloudinary)
+
 	weatherService := weather.NewWeatherService()
 	weatherHandler := handler.NewWeatherHandler(weatherService)
 
@@ -110,7 +114,7 @@ func main() {
 	aiFertilizerRecommendationService := ai.NewPlantService(apiKey)
 	aiFertilizerRecommendationHandler := handler.NewAIFertilizerRecommendationHandler(aiFertilizerRecommendationService)
 
-	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler, searchController, notificationController, wateringHistoryController, fertilizerController, aiFertilizerRecommendationHandler)
+	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler, searchController, notificationController, wateringHistoryController, fertilizerController, aiFertilizerRecommendationHandler, plantEarliestWateringHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
