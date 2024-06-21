@@ -14,6 +14,7 @@ require (
 	github.com/sashabaranov/go-openai v1.26.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.23.0
+	golang.org/x/oauth2 v0.20.0
 	google.golang.org/api v0.182.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gorm.io/driver/mysql v1.5.6
@@ -65,7 +66,6 @@ require (
 	go.opentelemetry.io/otel/metric v1.24.0 // indirect
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/oauth2 v0.20.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
