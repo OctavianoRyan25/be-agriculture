@@ -74,9 +74,9 @@ func main() {
 	plantUserService := plant.NewUserPlantService(plantUserRepository)
 	plantUserHandler := handler.NewUserPlantHandler(plantUserService)
 
-	plantEarliestWateringRepository  := plant.NewPlantEarliestWateringRepository(db)
-    plantEarliestWateringService := plant.NewPlantEarliestWateringService(plantEarliestWateringRepository)
-    plantEarliestWateringHandler := handler.NewPlantEarliestWateringHandler(plantEarliestWateringService, cloudinary)
+	plantEarliestWateringRepository := plant.NewPlantEarliestWateringRepository(db)
+	plantEarliestWateringService := plant.NewPlantEarliestWateringService(plantEarliestWateringRepository)
+	plantEarliestWateringHandler := handler.NewPlantEarliestWateringHandler(plantEarliestWateringService, cloudinary)
 
 	weatherService := weather.NewWeatherService()
 	weatherHandler := handler.NewWeatherHandler(weatherService)

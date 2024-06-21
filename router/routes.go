@@ -90,6 +90,14 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 
 	group.GET("/recommend-plants", aiFertilizer.GetPlantingRecommendation)
 
+	group.GET("/login-google", user.LoginGoogle)
+
+	group.GET("/auth/google/callback", user.CallbackGoogle)
+
+	group.GET("/login-google-andro", user.LoginGoogleforAndro)
+
+	group.GET("/auth-andro/google/callback", user.CallbackGoogleforAndro)
+
 	group.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
