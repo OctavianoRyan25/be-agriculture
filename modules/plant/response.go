@@ -226,6 +226,10 @@ type UserPlantResponse struct {
 	ID        int       `json:"id"`
 	Plant     PlantResponse `json:"plant"`
 	CustomizeName string `json:"customize_name"`
+	InstructionCategory1 int `json:"instruction_category_1"`
+	InstructionCategory2 int `json:"instruction_category_2"`
+	InstructionCategory3 int `json:"instruction_category_3"`
+	InstructionCategory4 int `json:"instruction_category_4"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -234,6 +238,10 @@ func NewUserPlantResponse(userPlant UserPlant) UserPlantResponse {
 		ID:        userPlant.ID,
 		Plant:     NewPlantResponse(userPlant.Plant),
 		CustomizeName: userPlant.CustomizeName,
+		InstructionCategory1: userPlant.InstructionCategory1,
+		InstructionCategory2: userPlant.InstructionCategory2,
+		InstructionCategory3: userPlant.InstructionCategory3,
+		InstructionCategory4: userPlant.InstructionCategory4,
 		CreatedAt: userPlant.CreatedAt,
 	}
 }
