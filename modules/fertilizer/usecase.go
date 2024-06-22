@@ -1,52 +1,81 @@
 package fertilizer
 
-type FertilizerUseCase interface {
-	CreateFertilizer(*Fertilizer) (*Fertilizer, error)
-	GetFertilizer(uint) ([]Fertilizer, error)
-	GetFertilizerByID(uint) ([]Fertilizer, error)
-	DeleteFertilizer(uint) error
-	UpdateFertilizer(uint) error
+type FertilizerService interface {
+	CreateFertilizer(input FertilizerInput) (FertilizerResponse, error)
+	GetFertilizer() ([]FertilizerResponse, error)
+	GetFertilizerByID(id int) (FertilizerResponse, error)
+	DeleteFertilizer(id int) error
+	UpdateFertilizer(id int, input FertilizerInput) (FertilizerResponse, error)
 }
 
-type fertilizerUseCase struct {
-	repo Repository
+type fertilizerService struct {
+	repository FertilizerRepository
 }
 
-// UpdateFertilizer implements FertilizerUseCase.
-func (uc *fertilizerUseCase) UpdateFertilizer(uint) error {
-	panic("unimplemented")
+func NewFertilizerService(repository FertilizerRepository) FertilizerService {
+	return &fertilizerService{repository}
 }
 
-func NewUseCase(repo Repository) *fertilizerUseCase {
-	return &fertilizerUseCase{
-		repo: repo,
-	}
-}
-
-func (uc *fertilizerUseCase) CreateFertilizer(f *Fertilizer) (*Fertilizer, error) {
-	f, err := uc.repo.CreateFertilizer(f)
+func (s *fertilizerService) GetFertilizer() ([]FertilizerResponse, error) {
+	categories, err := s.repository.GetFertilizer()
 	if err != nil {
 		return nil, err
 	}
-	return f, nil
-}
 
-func (uc *fertilizerUseCase) GetFertilizer(userID uint) ([]Fertilizer, error) {
-	f, err := uc.repo.GetFertilizer(userID)
-	if err != nil {
-		return nil, err
+	var responses []FertilizerResponse
+	for _, category := range categories {
+		responses = append(responses, NewFertilizerResponse(category))
 	}
-	return f, nil
+
+	return responses, nil
 }
 
-func (uc *fertilizerUseCase) GetFertilizerByID(userID uint) ([]Fertilizer, error) {
-	f, err := uc.repo.GetFertilizerByID(userID)
+func (s *fertilizerService) GetFertilizerByID(id int) (FertilizerResponse, error) {
+	category, err := s.repository.GetFertilizerByID(id)
 	if err != nil {
-		return nil, err
+		return FertilizerResponse{}, err
 	}
-	return f, nil
+
+	return NewFertilizerResponse(category), nil
 }
 
-func (u *fertilizerUseCase) DeleteFertilizer(userID uint) error {
-	return u.repo.DeleteFertilizer(userID)
+// UpdateFertilizer implements FertilizerService.
+func (s *fertilizerService) UpdateFertilizer(id int, input FertilizerInput) (FertilizerResponse, error) {
+	category, err := s.repository.GetFertilizerByID(id)
+	if err != nil {
+		return FertilizerResponse{}, err
+	}
+
+	category.Name = input.Name
+
+	updatedCategory, err := s.repository.UpdateFertilizer(category)
+	if err != nil {
+		return FertilizerResponse{}, err
+	}
+
+	return NewFertilizerResponse(updatedCategory), nil
+}
+
+func (s *fertilizerService) CreateFertilizer(input FertilizerInput) (FertilizerResponse, error) {
+	category := Fertilizer{
+		Id: input.Id,
+		Name:     input.Name,
+		Compostition: input.Compostition,
+		CreateAt: input.CreateAt,
+	}
+	newCategory, err := s.repository.CreateFertilizer(category)
+	if err != nil {
+		return FertilizerResponse{}, err
+	}
+
+	return NewFertilizerResponse(newCategory), nil
+}
+
+func (s *fertilizerService) DeleteFertilizer(id int) error {
+	category, err := s.repository.GetFertilizerByID(id)
+	if err != nil {
+		return err
+	}
+
+	return s.repository.DeleteFertilizer(category)
 }

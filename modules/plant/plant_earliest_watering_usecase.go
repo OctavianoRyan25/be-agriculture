@@ -24,7 +24,7 @@ func ConvertToTime(timeStr string) (time.Time, error) {
 }
 
 func (s *plantEarliestWateringService) FindEarliestWateringTime(plantID string) (PlantEarliestWatering, error) {
-    schedules, err := s.WateringScheduleRepo.GetWateringSchedules(plantID) // Assuming schedules are filtered by plantID
+    schedules, err := s.WateringScheduleRepo.GetEarliestWatering(plantID) // Assuming schedules are filtered by plantID
     if err != nil {
         return PlantEarliestWatering{}, err
     }

@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type FertilizerRequest struct {
+type FertilizerInput struct {
 	Id int `json:"id" gorm:"primaryKey"`
 	Name string `json:"name"`
 	Compostition string `json:"compostition"`
