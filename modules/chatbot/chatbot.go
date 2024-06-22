@@ -1,65 +1,65 @@
-package chatbot
+package bot
 
 import (
-	"bytes"
-	"encoding/json"
-	"io"
+	"context"
+	"fmt"
 	"net/http"
-	"github.com/OctavianoRyan25/be-agriculture/modules/chatbot/request"
+	"os"
 
+	"github.com/gtkit/go-openai"
 	"github.com/labstack/echo/v4"
 )
 
-type ChatAI struct{}
-
-// Model chatbot start conversation
-var AiPayload = map[string]interface{}{
-	"model": "gpt-3.5-turbo",
-	"messages": []map[string]string{
-		{"role": "system", "content": "Anda seorang ahli dalam bidang pertanian dan perkebunan"},
-	},
+type Input struct {
+	Question string `json:"question"`
 }
 
-func NewChatAI() *ChatAI {
-	return &ChatAI{}
+type Response struct {
+	Status string `json:"status"`
+	Data   string `json:"data"`
 }
 
-func (c *ChatAI) HandleChatCompletion(ctx echo.Context) error {
-	if len(AiPayload["messages"].([]map[string]string)) == 1 {
-		AiPayload["messages"] = append(AiPayload["messages"].([]map[string]string), map[string]string{"role": "system", "content": "Anda seorang ahli dalam bidang pertanian dan perkebunan"})
-	}
-
+func ClassifyEnvironmentalIssue(c echo.Context) error {
 	// Parse request body
-	var request request.Request
-	if err := ctx.Bind(&request); err != nil {
-		return ctx.JSON(http.StatusBadRequest, echo.Map{"error": "Failed to parse request body"})
+	var input Input
+	if err := c.Bind(&input); err != nil {
+		return err
 	}
 
-	// add user messages
-	AiPayload["messages"] = append(AiPayload["messages"].([]map[string]string), map[string]string{"role": "user", "content": request.Messages[0].Content})
-
-	// payload sended to endpoint
-	payload := map[string]interface{}{
-		"model":    "gpt-3.5-turbo",
-		"messages": []map[string]string{AiPayload["messages"].([]map[string]string)[len(AiPayload["messages"].([]map[string]string))-2], AiPayload["messages"].([]map[string]string)[len(AiPayload["messages"].([]map[string]string))-1]},
+	// Initialize OpenAI client
+	apiKey := os.Getenv("OPENAI_API_KEY")
+	if apiKey == "" {
+		return c.JSON(http.StatusInternalServerError, Response{Status: "error", Data: "Please set your OpenAI API key."})
 	}
+	client := openai.NewClient(apiKey)
 
-	jsonPayload, err := json.Marshal(payload)
+	// Generate response using OpenAI
+
+	resp, err := client.CreateChatCompletion(
+		context.Background(),
+		openai.ChatCompletionRequest{
+			Model: openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{Role: "system", Content: fmt.Sprintf("Halo, saya adalah pakar dalam pertanian. Silahkan tanyakan apa yang ingin anda tanyakan Masalah atau kejadian: %s", input.Question)},
+			},
+		},
+	)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to marshal JSON payload"})
+		errResponse := Response{
+			Status: "error",
+			Data:   err.Error(),
+		}
+		return c.JSON(http.StatusInternalServerError, errResponse)
 	}
 
-	// Request to endpoint
-	resp, err := http.Post("https://wgpt-production.up.railway.app/v1/chat/completions", "application/json", bytes.NewBuffer(jsonPayload))
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to connect to chatbot endpoint"})
-	}
-	defer resp.Body.Close()
+	// Extract response from completion
+	response := resp.Choices[0].Message.Content
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to read response body"})
+	// Create response
+	responseObj := Response{
+		Status: "success",
+		Data:   response,
 	}
 
-	return ctx.JSONBlob(resp.StatusCode, body)
+	return c.JSON(http.StatusOK, responseObj)
 }

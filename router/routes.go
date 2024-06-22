@@ -84,7 +84,7 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	group.GET("/check-watering", wateringhistory.GetLateWateringHistories, middlewares.Authentication())
 	group.GET("/watering-earliest", plantEarliestWateringHandler.GetEarliestWateringTime)
 
-	group.POST("/chatbot", chatbot.NewChatAI().HandleChatCompletion)
+	group.POST("/chatbot", bot.ClassifyEnvironmentalIssue)
 
 	group.GET("/recommend-fertilizer", aiFertilizer.GetFertilizerRecommendation)
 

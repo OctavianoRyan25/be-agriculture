@@ -3,6 +3,7 @@ package fertilizer
 type FertilizerUseCase interface {
 	CreateFertilizer(*Fertilizer) (*Fertilizer, error)
 	GetFertilizer(uint) ([]Fertilizer, error)
+	GetFertilizerByID(uint) ([]Fertilizer, error)
 	DeleteFertilizer(uint) error
 	UpdateFertilizer(uint) error
 }
@@ -32,6 +33,13 @@ func (uc *fertilizerUseCase) CreateFertilizer(f *Fertilizer) (*Fertilizer, error
 
 func (uc *fertilizerUseCase) GetFertilizer(userID uint) ([]Fertilizer, error) {
 	f, err := uc.repo.GetFertilizer(userID)
+	if err != nil {
+		return nil, err
+	}
+	return f, nil
+}
+func (uc *fertilizerUseCase) GetFertilizerByID(userID uint) ([]Fertilizer, error) {
+	f, err := uc.repo.GetFertilizerByID(userID)
 	if err != nil {
 		return nil, err
 	}

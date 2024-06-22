@@ -5,6 +5,7 @@ import "gorm.io/gorm"
 type Repository interface {
 	CreateFertilizer(*Fertilizer) (*Fertilizer, error)
 	GetFertilizer(uint) ([]Fertilizer, error)
+	GetFertilizerByID(uint) ([]Fertilizer, error)
 	DeleteFertilizer(uint) error
 	UpdateFertilizer(uint) error
 }
