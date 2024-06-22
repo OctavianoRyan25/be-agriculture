@@ -47,6 +47,15 @@ func (r *FertilizerRepository) GetFertilizer(userID uint) ([]Fertilizer, error) 
 	return f, nil
 }
 
+func (r *FertilizerRepository) GetFertilizerByID(userID uint) ([]Fertilizer, error) {
+	var f []Fertilizer
+	err := r.db.Preload("Id").Preload("Name").Preload("Plant").Order("create_at").Where("user_id = ?", userID).Find(&f).Error
+	if err != nil {
+		return nil, err
+	}
+	return f, nil
+}
+
 func (r *FertilizerRepository) DeleteFertilizer(userID uint) error {
 	err := r.db.Where("user_id = ?", userID).Delete(&Fertilizer{}).Error
 	if err != nil {

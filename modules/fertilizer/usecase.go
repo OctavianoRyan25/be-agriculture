@@ -38,6 +38,7 @@ func (uc *fertilizerUseCase) GetFertilizer(userID uint) ([]Fertilizer, error) {
 	}
 	return f, nil
 }
+
 func (uc *fertilizerUseCase) GetFertilizerByID(userID uint) ([]Fertilizer, error) {
 	f, err := uc.repo.GetFertilizerByID(userID)
 	if err != nil {
