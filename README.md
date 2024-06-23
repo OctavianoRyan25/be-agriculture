@@ -93,6 +93,7 @@ Untuk fitur-fitur lainnya dapat dilihat sebagai berikut:
 - OpenAI -> github.com/sashabaranov/go-openai
 - MySQL -> github.com/go-sql-driver/mysql
 - Firebase -> firebase.google.com/go/v4
+- oAuth v2 -> github.com/golang/oauth2
 
 **Service:**
 
