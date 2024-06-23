@@ -101,7 +101,7 @@ func (c *ArticleController) GetArticle(e echo.Context) error {
 	}
 	res := &base.SuccessResponse{
 		Status:  "success",
-		Message: "Article created",
+		Message: "Success get article",
 		Data:    ArticleTOResponse(article),
 	}
 	return e.JSON(http.StatusOK, res)

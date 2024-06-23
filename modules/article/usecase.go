@@ -21,6 +21,9 @@ func NewUseCase(repo Repository) *useCase {
 }
 
 func (uc *useCase) StoreArticle(a *Article) (*Article, error) {
+	location, _ := time.LoadLocation("Asia/Jakarta")
+	a.CreatedAt = time.Now().In(location)
+	a.UpdatedAt = time.Now().In(location)
 	return uc.repo.StoreArticle(a)
 }
 

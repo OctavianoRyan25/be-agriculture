@@ -47,7 +47,7 @@ func (r *articleRepository) GetAllArticles() ([]Article, error) {
 }
 
 func (r *articleRepository) UpdateArticle(a *Article, id int) (*Article, error) {
-	err := r.db.Where("id = ?", id).Save(a).Error
+	err := r.db.Where("id = ?", id).Updates(a).Error
 	if err != nil {
 		return nil, err
 	}
