@@ -6,7 +6,7 @@ type Repository interface {
 	StoreArticle(*Article) (*Article, error)
 	GetArticle(int) (*Article, error)
 	GetAllArticles() ([]Article, error)
-	UpdateArticle(*Article) (*Article, error)
+	UpdateArticle(a *Article, id int) (*Article, error)
 	DeleteArticle(int) error
 }
 
@@ -46,8 +46,8 @@ func (r *articleRepository) GetAllArticles() ([]Article, error) {
 	return articles, nil
 }
 
-func (r *articleRepository) UpdateArticle(a *Article) (*Article, error) {
-	err := r.db.Save(a).Error
+func (r *articleRepository) UpdateArticle(a *Article, id int) (*Article, error) {
+	err := r.db.Where("id = ?", id).Save(a).Error
 	if err != nil {
 		return nil, err
 	}

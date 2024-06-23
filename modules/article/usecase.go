@@ -1,10 +1,12 @@
 package article
 
+import "time"
+
 type UseCase interface {
 	StoreArticle(*Article) (*Article, error)
 	GetArticle(int) (*Article, error)
 	GetAllArticles() ([]Article, error)
-	UpdateArticle(*Article) (*Article, error)
+	UpdateArticle(a *Article, id int) (*Article, error)
 	DeleteArticle(int) error
 }
 
@@ -30,8 +32,10 @@ func (uc *useCase) GetAllArticles() ([]Article, error) {
 	return uc.repo.GetAllArticles()
 }
 
-func (uc *useCase) UpdateArticle(a *Article) (*Article, error) {
-	return uc.repo.UpdateArticle(a)
+func (uc *useCase) UpdateArticle(a *Article, id int) (*Article, error) {
+	location, _ := time.LoadLocation("Asia/Jakarta")
+	a.UpdatedAt = time.Now().In(location)
+	return uc.repo.UpdateArticle(a, id)
 }
 
 func (uc *useCase) DeleteArticle(id int) error {

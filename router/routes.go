@@ -101,6 +101,10 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	group.GET("/auth", user.GetToken)
 
 	group.POST("/article", article.StoreArticle, middlewares.Authentication())
+	group.GET("/article", article.GetAllArticles)
+	group.GET("/article/:id", article.GetArticle)
+	group.PUT("/article/:id", article.UpdateArticle, middlewares.Authentication())
+	group.DELETE("/article/:id", article.DeleteArticle, middlewares.Authentication())
 
 	group.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
