@@ -141,4 +141,5 @@ type UserPlantHistory struct {
 type PlantEarliestWatering struct {
     PlantID      string `json:"plant_id"`
     WateringTime string `json:"watering_time"`
+	Plant Plant  `gorm:"foreignKey:PlantID;references:ID"`
 }

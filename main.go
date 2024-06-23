@@ -102,9 +102,9 @@ func main() {
 	wateringHistoryUseCase := wateringhistory.NewUseCase(wateringHistoryRepo)
 	wateringHistoryController := wateringhistory.NeWateringHistoryController(wateringHistoryUseCase)
 
-	fertilizerRepo := fertilizer.NewRepository(db)
-	fertilizerUseCase := fertilizer.NewUseCase(fertilizerRepo)
-	fertilizerController := fertilizer.NewFertilizerController(fertilizerUseCase)
+	fertilizerRepo := fertilizer.NewFertilizerRepository(db)
+	fertilizerUseCase := fertilizer.NewFertilizerService(fertilizerRepo)
+	fertilizerHandler := handler.NewFertilizerHandler(fertilizerUseCase, cloudinary)
 
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
@@ -114,7 +114,7 @@ func main() {
 	aiFertilizerRecommendationService := ai.NewPlantService(apiKey)
 	aiFertilizerRecommendationHandler := handler.NewAIFertilizerRecommendationHandler(aiFertilizerRecommendationService)
 
-	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler, searchController, notificationController, wateringHistoryController, fertilizerController, aiFertilizerRecommendationHandler, plantEarliestWateringHandler)
+	router.InitRoutes(e, controller, controllerAdmin, plantCategoryHandler, plantHandler, plantUserHandler, weatherHandler, plantInstructionCategoryHandler, plantProgressHandler, searchController, notificationController, wateringHistoryController, fertilizerHandler, aiFertilizerRecommendationHandler, plantEarliestWateringHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

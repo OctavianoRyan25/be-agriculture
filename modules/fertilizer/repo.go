@@ -2,65 +2,45 @@ package fertilizer
 
 import "gorm.io/gorm"
 
-type Repository interface {
-	CreateFertilizer(*Fertilizer) (*Fertilizer, error)
-	GetFertilizer(uint) ([]Fertilizer, error)
-	GetFertilizerByID(uint) ([]Fertilizer, error)
-	DeleteFertilizer(uint) error
-	UpdateFertilizer(uint) error
+type FertilizerRepository interface {
+	GetFertilizer() ([]Fertilizer, error)
+	GetFertilizerByID(id int) (Fertilizer, error)
+	CreateFertilizer(fertilizer Fertilizer) (Fertilizer, error)
+	UpdateFertilizer(fertilizer Fertilizer) (Fertilizer, error)
+	DeleteFertilizer(fertilizer Fertilizer) error
 }
 
-type FertilizerRepository struct {
+type fertilizerRepository struct {
 	db *gorm.DB
 }
 
-// UpdateFertilizer implements Repository.
-func (r *FertilizerRepository) UpdateFertilizer(uint) error {
-	panic("unimplemented")
+func NewFertilizerRepository(db *gorm.DB) FertilizerRepository {
+	return &fertilizerRepository{db}
 }
 
-func NewRepository(db *gorm.DB) *FertilizerRepository {
-	return &FertilizerRepository{
-		db: db,
-	}
+func (r *fertilizerRepository) GetFertilizer() ([]Fertilizer, error) {
+	var fertilizers []Fertilizer
+	err := r.db.Preload("Plant").Find(&fertilizers).Error
+	return fertilizers, err
 }
 
-func (r *FertilizerRepository) CreateFertilizer(f *Fertilizer) (*Fertilizer, error) {
-	err := r.db.Create(f).Error
-	if err != nil {
-		return nil, err
-	}
-
-	err = r.db.Preload("User").Preload("Plant").First(f, f.Id).Error
-	if err != nil {
-		return nil, err
-	}
-	return f, nil
+func (r *fertilizerRepository) GetFertilizerByID(id int) (Fertilizer, error) {
+	var fertilizer Fertilizer
+	err := r.db.Preload("Plant").First(&fertilizer, id).Error
+	return fertilizer, err
 }
 
-func (r *FertilizerRepository) GetFertilizer(userID uint) ([]Fertilizer, error) {
-	var f []Fertilizer
-	err := r.db.Preload("Id").Preload("Name").Preload("Plant").Order("create_at").Where("user_id = ?", userID).Find(&f).Error
-	if err != nil {
-		return nil, err
-	}
-	return f, nil
+func (r *fertilizerRepository) CreateFertilizer(fertilizer Fertilizer) (Fertilizer, error) {
+	err := r.db.Create(&fertilizer).Error
+	return fertilizer, err
 }
 
-func (r *FertilizerRepository) GetFertilizerByID(userID uint) ([]Fertilizer, error) {
-	var f []Fertilizer
-	err := r.db.Preload("Id").Preload("Name").Preload("Plant").Order("create_at").Where("user_id = ?", userID).Find(&f).Error
-	if err != nil {
-		return nil, err
-	}
-	return f, nil
+func (r *fertilizerRepository) UpdateFertilizer(fertilizer Fertilizer) (Fertilizer, error) {
+	err := r.db.Save(&fertilizer).Error
+	return fertilizer, err
 }
 
-func (r *FertilizerRepository) DeleteFertilizer(userID uint) error {
-	err := r.db.Where("user_id = ?", userID).Delete(&Fertilizer{}).Error
-	if err != nil {
-		return err
-	}
-
-	return nil
+func (r *fertilizerRepository) DeleteFertilizer(fertilizer Fertilizer) error {
+	err := r.db.Delete(&fertilizer).Error
+	return err
 }
