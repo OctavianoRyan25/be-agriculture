@@ -45,8 +45,10 @@ func (s *fertilizerService) UpdateFertilizer(id int, input FertilizerInput) (Fer
 	if err != nil {
 		return FertilizerResponse{}, err
 	}
-
+	category.Id = input.Id
 	category.Name = input.Name
+	category.Compostition = input.Compostition
+	category.CreateAt = input.CreateAt
 
 	updatedCategory, err := s.repository.UpdateFertilizer(category)
 	if err != nil {
@@ -58,10 +60,10 @@ func (s *fertilizerService) UpdateFertilizer(id int, input FertilizerInput) (Fer
 
 func (s *fertilizerService) CreateFertilizer(input FertilizerInput) (FertilizerResponse, error) {
 	category := Fertilizer{
-		Id: input.Id,
-		Name:     input.Name,
+		Id:           input.Id,
+		Name:         input.Name,
 		Compostition: input.Compostition,
-		CreateAt: input.CreateAt,
+		CreateAt:     input.CreateAt,
 	}
 	newCategory, err := s.repository.CreateFertilizer(category)
 	if err != nil {

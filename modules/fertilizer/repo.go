@@ -20,13 +20,13 @@ func NewFertilizerRepository(db *gorm.DB) FertilizerRepository {
 
 func (r *fertilizerRepository) GetFertilizer() ([]Fertilizer, error) {
 	var fertilizers []Fertilizer
-	err := r.db.Preload("Plant").Find(&fertilizers).Error
+	err := r.db.Find(&fertilizers).Error
 	return fertilizers, err
 }
 
 func (r *fertilizerRepository) GetFertilizerByID(id int) (Fertilizer, error) {
 	var fertilizer Fertilizer
-	err := r.db.Preload("Plant").First(&fertilizer, id).Error
+	err := r.db.First(&fertilizer, id).Error
 	return fertilizer, err
 }
 
