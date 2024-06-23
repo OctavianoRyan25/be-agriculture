@@ -21,8 +21,8 @@ func NewArticleController(useCase UseCase) *ArticleController {
 }
 
 func (c *ArticleController) StoreArticle(e echo.Context) error {
-	role := e.Get("admin").(string)
-	if role != "user" {
+	role := e.Get("role").(string)
+	if role != "admin" {
 		errRes := base.ErrorResponse{
 			Status:  "error",
 			Message: "Forbidden access",
