@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/OctavianoRyan25/be-agriculture/base"
 	"github.com/OctavianoRyan25/be-agriculture/utils/helper"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
@@ -48,14 +49,36 @@ func CallbackGoogle(c echo.Context) error {
 
 	parse, _ := strconv.Atoi(userinfo.Id)
 
-	jwtToken, err := GenerateJWTToken(uint(parse), userinfo.Email)
+	jwtToken, err := helper.GenerateToken(uint(parse), userinfo.Email, "user")
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, "Failed to generate JWT token: "+err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"token": jwtToken,
-	})
+	// return c.JSON(http.StatusOK, map[string]string{
+	// 	"token": jwtToken,
+	// })
+
+	return c.Redirect(http.StatusTemporaryRedirect, "https://be-agriculture-awh2j5ffyq-uc.a.run.app/api/v1/auth?token="+jwtToken)
+}
+
+func GetToken(c echo.Context) error {
+	param := c.QueryParam("token")
+	if param == "" {
+		errRes := base.ErrorResponse{
+			Status:  "error",
+			Message: "Token is required",
+			Code:    http.StatusBadRequest,
+		}
+		return c.JSON(http.StatusBadRequest, errRes)
+	}
+
+	successRes := base.SuccessResponse{
+		Status:  "success",
+		Message: "Token is valid",
+		Data:    param,
+	}
+
+	return c.JSON(http.StatusOK, successRes)
 }
 
 func GenerateJWTToken(userID uint, email string) (string, error) {

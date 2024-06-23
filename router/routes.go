@@ -6,7 +6,7 @@ import (
 	"github.com/OctavianoRyan25/be-agriculture/handler"
 	"github.com/OctavianoRyan25/be-agriculture/middlewares"
 	"github.com/OctavianoRyan25/be-agriculture/modules/admin"
-	"github.com/OctavianoRyan25/be-agriculture/modules/chatbot"
+	bot "github.com/OctavianoRyan25/be-agriculture/modules/chatbot"
 	"github.com/OctavianoRyan25/be-agriculture/modules/fertilizer"
 	"github.com/OctavianoRyan25/be-agriculture/modules/notification"
 	"github.com/OctavianoRyan25/be-agriculture/modules/search"
@@ -97,6 +97,8 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	group.GET("/login-google-andro", user.LoginGoogleforAndro)
 
 	group.GET("/auth-andro/google/callback", user.CallbackGoogleforAndro)
+
+	group.GET("/auth", user.GetToken)
 
 	group.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
