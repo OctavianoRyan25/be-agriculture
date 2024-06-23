@@ -6,7 +6,7 @@ import (
 	"github.com/OctavianoRyan25/be-agriculture/handler"
 	"github.com/OctavianoRyan25/be-agriculture/middlewares"
 	"github.com/OctavianoRyan25/be-agriculture/modules/admin"
-	"github.com/OctavianoRyan25/be-agriculture/modules/chatbot"
+	bot "github.com/OctavianoRyan25/be-agriculture/modules/chatbot"
 	"github.com/OctavianoRyan25/be-agriculture/modules/fertilizer"
 	"github.com/OctavianoRyan25/be-agriculture/modules/notification"
 	"github.com/OctavianoRyan25/be-agriculture/modules/search"
@@ -15,7 +15,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func InitRoutes(e *echo.Echo, userController *user.UserController, adminController *admin.AdminController, plantCategoryHandler *handler.PlantCategoryHandler, plantHandler *handler.PlantHandler, plantUserHandler *handler.UserPlantHandler, weatherHandler *handler.WeatherHandler, plantInstructionCategoryHandler *handler.PlantInstructionCategoryHandler, plantProgressHandler *handler.PlantProgressHandler, search *search.SearchController, notification *notification.NotificationController, wateringhistory *wateringhistory.WateringHistoryController, fertilizer *fertilizer.FertilizerController, aiFertilizer *handler.AIFertilizerRecommendationHandler) {
+func InitRoutes(e *echo.Echo, userController *user.UserController, adminController *admin.AdminController, plantCategoryHandler *handler.PlantCategoryHandler, plantHandler *handler.PlantHandler, plantUserHandler *handler.UserPlantHandler, weatherHandler *handler.WeatherHandler, plantInstructionCategoryHandler *handler.PlantInstructionCategoryHandler, plantProgressHandler *handler.PlantProgressHandler, search *search.SearchController, notification *notification.NotificationController, wateringhistory *wateringhistory.WateringHistoryController, fertilizer *fertilizer.FertilizerController, aiFertilizer *handler.AIFertilizerRecommendationHandler, plantEarliestWateringHandler *handler.PlantEarliestWateringHandler) {
 	group := e.Group("/api/v1")
 	group.POST("/register", userController.RegisterUser)
 	group.POST("/check-email", userController.CheckEmail)
@@ -82,12 +82,23 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	group.POST("/watering-history", wateringhistory.StoreWateringHistory, middlewares.Authentication())
 	group.GET("/watering-history", wateringhistory.GetAllWateringHistories, middlewares.Authentication())
 	group.GET("/check-watering", wateringhistory.GetLateWateringHistories, middlewares.Authentication())
+	group.GET("/watering-earliest/:plant_id", plantEarliestWateringHandler.GetEarliestWateringTime)
 
-	group.POST("/chatbot", chatbot.NewChatAI().HandleChatCompletion)
+	group.POST("/chatbot", bot.ClassifyEnvironmentalIssue)
 
 	group.GET("/recommend-fertilizer", aiFertilizer.GetFertilizerRecommendation)
 
 	group.GET("/recommend-plants", aiFertilizer.GetPlantingRecommendation)
+
+	group.GET("/login-google", user.LoginGoogle)
+
+	group.GET("/auth/google/callback", user.CallbackGoogle)
+
+	group.GET("/login-google-andro", user.LoginGoogleforAndro)
+
+	group.GET("/auth-andro/google/callback", user.CallbackGoogleforAndro)
+
+	group.GET("/auth", user.GetToken)
 
 	group.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")

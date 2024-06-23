@@ -11,6 +11,7 @@ type PlantRepository interface {
 	FindByIDWithRelations(id int) (Plant, error)
 	CountAll(count *int64) error
 	SearchPlantsByName(name string, limit, offset int) ([]Plant, error)
+	FindEarliestWateringTime(name string, limit, offset int) ([]Plant, error)
 	CountPlantsByName(name string) (int64, error)
 	ClearPlantInstructions(plantID int) error
 	ClearPlantFAQs(plantID int) error
@@ -124,6 +125,22 @@ func (r *plantRepository) CountAll(count *int64) error {
 }
 
 func (r *plantRepository) SearchPlantsByName(name string, limit, offset int) ([]Plant, error) {
+	var plants []Plant
+	err := r.db.Preload("PlantCategory").
+		Preload("PlantCharacteristic").
+		Preload("WateringSchedule").
+		Preload("PlantInstructions").
+		Preload("PlantInstructions.InstructionCategory").
+		Preload("PlantFAQs").
+		Preload("PlantImages").
+		Where("name LIKE ?", "%"+name+"%").
+		Limit(limit).
+		Offset(offset).
+		Find(&plants).Error
+	return plants, err
+}
+
+func (r *plantRepository) FindEarliestWateringTime(name string, limit, offset int) ([]Plant, error) {
 	var plants []Plant
 	err := r.db.Preload("PlantCategory").
 		Preload("PlantCharacteristic").

@@ -40,13 +40,13 @@ func (r *searchRepo) Search(params PlantSearchParams) ([]plant.Plant, error) {
 	if params.HarvestDuration != "" {
 		switch params.HarvestDuration {
 		case "less than 1 month":
-			query = query.Where("harvest_duration < ?", 30)
+			query = query.Where("harvest_duration < ?", 1)
 		case "1-3 months":
-			query = query.Where("harvest_duration >= ? AND harvest_duration <= ?", 30, 90)
+			query = query.Where("harvest_duration >= ? AND harvest_duration <= ?", 1, 3)
 		case "3-6 months":
-			query = query.Where("harvest_duration > ?", 90)
+			query = query.Where("harvest_duration >= ? AND harvest_duration <= ?", 3, 6)
 		case "more than 6 months":
-			query = query.Where("harvest_duration > ?", 180)
+			query = query.Where("harvest_duration > ?", 6)
 		default:
 			return nil, errors.New("invalid harvest duration")
 		}
