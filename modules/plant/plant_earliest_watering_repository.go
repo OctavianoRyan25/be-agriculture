@@ -4,7 +4,7 @@ package plant
 import "gorm.io/gorm"
 
 type PlantEarliestWateringRepository interface {
-	GetEarliestWatering(plantID string) ([]PlantEarliestWatering, error)
+	GetEarliestWatering() ([]PlantReminder, error)
 }
 
 type plantEarliestWateringRepository struct {
@@ -16,8 +16,8 @@ func NewPlantEarliestWateringRepository(db *gorm.DB) PlantEarliestWateringReposi
 }
 
 // GetEarliestWatering implements PlantEarliestWateringRepository.
-func (r *plantEarliestWateringRepository) GetEarliestWatering(plantID string) ([]PlantEarliestWatering, error) {
-	var categories []PlantEarliestWatering
-	err := r.db.First(&categories).Error
-	return categories, err
+func (r *plantEarliestWateringRepository) GetEarliestWatering() ([]PlantReminder, error) {
+	var schedule []PlantReminder
+	err := r.db.Find(&schedule).Error
+	return schedule, err
 }

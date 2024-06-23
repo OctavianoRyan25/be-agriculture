@@ -27,6 +27,12 @@ type PlantCategoryClimateResponse struct {
 	ImageURL string `json:"image_url"`
 }
 
+type PlantEarliestWateringResponse struct {
+	ID           int    `json:"id"`
+	PlantID      int    `json:"plant_id"`
+	WateringTime string `json:"watering_time"`
+}
+
 type PlantCharacteristicResponse struct {
 	ID         int    `json:"id"`
 	Height     int    `json:"height"`
@@ -114,6 +120,14 @@ func NewPlantCategoryResponse(category PlantCategory) PlantCategoryClimateRespon
 		ID:       category.ID,
 		Name:     category.Name,
 		ImageURL: category.ImageURL,
+	}
+}
+
+func NewPlantEarliestWateringResponse(category PlantEarliestWatering) PlantEarliestWateringResponse {
+	return PlantEarliestWateringResponse{
+		ID:           category.ID,
+		PlantID:      category.PlantID,
+		WateringTime: category.WateringTime,
 	}
 }
 
