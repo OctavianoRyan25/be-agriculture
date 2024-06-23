@@ -21,7 +21,7 @@ func NewArticleController(useCase UseCase) *ArticleController {
 }
 
 func (c *ArticleController) StoreArticle(e echo.Context) error {
-	role := e.Get("role").(string)
+	role := e.Get("admin").(string)
 	if role != "user" {
 		errRes := base.ErrorResponse{
 			Status:  "error",
