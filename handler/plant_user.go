@@ -18,6 +18,30 @@ func NewUserPlantHandler(service plant.UserPlantService) *UserPlantHandler {
     return &UserPlantHandler{service}
 }
 
+func (h *UserPlantHandler) GetUserPlantByUserIDAndPlantID(c echo.Context) error {
+	plantID, err := strconv.Atoi(c.Param("plant_id"))
+	if err != nil {
+			response := helper.APIResponse("Invalid plant ID", http.StatusBadRequest, "error", nil)
+			return c.JSON(http.StatusBadRequest, response)
+	}
+
+	userID, ok := c.Get("user_id").(uint)
+	if !ok {
+			response := helper.APIResponse("Invalid user ID from token", http.StatusInternalServerError, "error", nil)
+			return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	userPlant, err := h.service.GetUserPlantByUserIDAndPlantID(int(userID), plantID)
+	if err != nil {
+			response := helper.APIResponse("Failed to fetch user plant", http.StatusInternalServerError, "error", nil)
+			return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	response := helper.APIResponse("User plant fetched successfully", http.StatusOK, "success", userPlant)
+	return c.JSON(http.StatusOK, response)
+}
+
+
 func (h *UserPlantHandler) UpdateInstructionCategory(c echo.Context) error {
 	var request plant.UpdateInstructionCategoryInput
 	if err := c.Bind(&request); err != nil {

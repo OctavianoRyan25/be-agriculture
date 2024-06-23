@@ -19,6 +19,7 @@ type UserPlantService interface {
 	UpdateCustomizeName(userPlantID int, customizeName string) (UserPlantResponse, error)
 	CheckUserPlantExistsForAdd(userID, plantID int) (bool, error)
 	UpdateInstructionCategory(input UpdateInstructionCategoryInput) error
+	GetUserPlantByUserIDAndPlantID(userID int, plantID int) (UserPlantResponse, error)
 }
 
 type userPlantService struct {
@@ -27,6 +28,14 @@ type userPlantService struct {
 
 func NewUserPlantService(repository UserPlantRepository) UserPlantService {
 	return &userPlantService{repository}
+}
+
+func (s *userPlantService) GetUserPlantByUserIDAndPlantID(userID int, plantID int) (UserPlantResponse, error) {
+	userPlant, err := s.repository.GetUserPlantByUserIDAndPlantID(userID, plantID)
+	if err != nil {
+			return UserPlantResponse{}, err
+	}
+	return NewUserPlantResponse(userPlant), nil
 }
 
 func (s *userPlantService) UpdateInstructionCategory(input UpdateInstructionCategoryInput) error {

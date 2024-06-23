@@ -21,6 +21,7 @@ type UserPlantRepository interface {
 	CheckUserPlantExists(userPlantID int) (bool, error)
 	CheckUserPlantExistsForAdd(userID, plantID int) (bool, error)
 	UpdateInstructionCategory(userPlantID int, fieldToUpdate string) error
+	GetUserPlantByUserIDAndPlantID(userID int, plantID int) (UserPlant, error)
 }
 
 type userPlantRepository struct {
@@ -29,6 +30,22 @@ type userPlantRepository struct {
 
 func NewUserPlantRepository(db *gorm.DB) UserPlantRepository {
 	return &userPlantRepository{db}
+}
+
+func (r *userPlantRepository) GetUserPlantByUserIDAndPlantID(userID int, plantID int) (UserPlant, error) {
+	var userPlant UserPlant
+	err := r.db.Preload("Plant").
+	Preload("Plant.PlantCategory").
+	Preload("Plant.PlantCharacteristic").
+	Preload("Plant.WateringSchedule").
+	Preload("Plant.PlantInstructions").
+	Preload("Plant.PlantInstructions.InstructionCategory").
+	Preload("Plant.PlantFAQs").
+	Preload("Plant.PlantImages").Where("user_id = ? AND plant_id = ?", userID, plantID).First(&userPlant).Error
+	if err != nil {
+		return userPlant, err
+	}
+	return userPlant, nil
 }
 
 func (r *userPlantRepository) UpdateInstructionCategory(userPlantID int, fieldToUpdate string) error {
@@ -142,6 +159,7 @@ func (r *userPlantRepository) GetUserPlantsByUserID(userID int, limit int, offse
 		Preload("Plant.PlantCharacteristic").
 		Preload("Plant.WateringSchedule").
 		Preload("Plant.PlantInstructions").
+		Preload("Plant.PlantInstructions.InstructionCategory").
 		Preload("Plant.PlantFAQs").
 		Preload("Plant.PlantImages").
 		Where("user_id = ?", userID)

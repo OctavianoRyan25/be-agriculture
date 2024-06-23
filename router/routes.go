@@ -62,6 +62,7 @@ func InitRoutes(e *echo.Echo, userController *user.UserController, adminControll
 	group.POST("/my/plants/history", plantUserHandler.AddUserPlantHistory, middlewares.Authentication())
 	group.GET("/my/plants/history", plantUserHandler.GetUserPlantHistoryByUserID, middlewares.Authentication())
 	group.PUT("/my/plants/update-instructions", plantUserHandler.UpdateInstructionCategory, middlewares.Authentication())
+	group.GET("/my/plant/details/:plant_id", plantUserHandler.GetUserPlantByUserIDAndPlantID, middlewares.Authentication())
 
 
 	group.GET("/weather/current", weatherHandler.GetCurrentWeather, middlewares.Authentication())
