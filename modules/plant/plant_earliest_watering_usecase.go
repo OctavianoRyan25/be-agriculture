@@ -7,15 +7,15 @@ import (
 )
 
 type PlantEarliestWateringService interface {
-    FindEarliestWateringTime(plantID string) (PlantEarliestWatering, error)
+    FindEarliestWateringTime() ([]PlantReminderResponse, error)
 }
 
 type plantEarliestWateringService struct {
-    WateringScheduleRepo PlantEarliestWateringRepository
+    repository PlantEarliestWateringRepository
 }
 
-func NewPlantEarliestWateringService(repo PlantEarliestWateringRepository) PlantEarliestWateringService {
-    return &plantEarliestWateringService{WateringScheduleRepo: repo}
+func NewPlantEarliestWateringService(repository PlantEarliestWateringRepository) PlantEarliestWateringService {
+    return &plantEarliestWateringService{repository}
 }
 
 func ConvertToTime(timeStr string) (time.Time, error) {
@@ -23,25 +23,26 @@ func ConvertToTime(timeStr string) (time.Time, error) {
     return time.Parse(layout, timeStr)
 }
 
-func (s *plantEarliestWateringService) FindEarliestWateringTime(plantID string) (PlantEarliestWatering, error) {
-    schedules, err := s.WateringScheduleRepo.GetEarliestWatering(plantID) // Assuming schedules are filtered by plantID
-    if err != nil {
-        return PlantEarliestWatering{}, err
-    }
+func (s *plantEarliestWateringService) FindEarliestWateringTime() ([]PlantReminderResponse, error) {
+   schedules, err := s.repository.GetEarliestWatering()
+	if err != nil {
+		return nil, err
+	}
+
     if len(schedules) == 0 {
-        return PlantEarliestWatering{}, fmt.Errorf("no schedules provided")
+        return []PlantReminderResponse{}, fmt.Errorf("no schedules provided")
     }
 
     earliestSchedule := schedules[0]
     earliestTime, err := ConvertToTime(earliestSchedule.WateringTime)
     if err != nil {
-        return PlantEarliestWatering{}, err
+        return []PlantReminderResponse{}, err
     }
 
     for _, schedule := range schedules[1:] {
         currentTime, err := ConvertToTime(schedule.WateringTime)
         if err != nil {
-            return PlantEarliestWatering{}, err
+            return []PlantReminderResponse{}, err
         }
 
         if currentTime.Before(earliestTime) {
@@ -49,5 +50,6 @@ func (s *plantEarliestWateringService) FindEarliestWateringTime(plantID string) 
             earliestSchedule = schedule
         }
     }
-    return earliestSchedule, nil
+    response := NewPlantReminderResponse(earliestSchedule)
+    return []PlantReminderResponse{response}, nil
 }
