@@ -36,7 +36,10 @@ func (uc *adminUseCase) RegisterUser(user *Admin) (*Admin, int, error) {
 	user.Updated_at = time.Now()
 
 	registeredUser, err := uc.repo.RegisterUser(user)
-	return registeredUser, constants.CodeSuccess, err
+	if err != nil {
+		return nil, constants.ErrCodeBadRequest, err
+	}
+	return registeredUser, constants.CodeSuccess, nil
 }
 
 func (uc *adminUseCase) CheckEmail(email string) (int, error) {

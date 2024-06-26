@@ -9,6 +9,7 @@ require (
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/go-resty/resty/v2 v2.13.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/golang/mock v1.1.1
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sashabaranov/go-openai v1.26.0
