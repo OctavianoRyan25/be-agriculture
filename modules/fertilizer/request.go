@@ -1,12 +1,15 @@
 package fertilizer
 
-import (
-	"time"
-)
-
 type FertilizerInput struct {
-	Id           int       `json:"id" gorm:"primaryKey"`
-	Name         string    `json:"name"`
-	Compostition string    `json:"compostition"`
-	CreateAt     time.Time `json:"createAt"`
+	Name         string `json:"name"`
+	PlantID      int    `json:"plantId"`
+	Compostition string `json:"compostition"`
+}
+
+func NewFertilizerInput(fertilizer FertilizerInput) *Fertilizer {
+	return &Fertilizer{
+		Name:         fertilizer.Name,
+		PlantID:      fertilizer.PlantID,
+		Compostition: fertilizer.Compostition,
+	}
 }

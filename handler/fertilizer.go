@@ -29,7 +29,12 @@ func (h *FertilizerHandler) GetFertilizer(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, response)
 	}
 
-	response := helper.APIResponse("Fertilizer fetched successfully", http.StatusOK, "success", categories)
+	var res []fertilizer.FertilizerResponse
+	for _, v := range categories {
+		res = append(res, *fertilizer.NewFertilizerResponse(v))
+	}
+
+	response := helper.APIResponse("Fertilizer fetched successfully", http.StatusOK, "success", res)
 	return c.JSON(http.StatusOK, response)
 }
 
@@ -47,7 +52,9 @@ func (h *FertilizerHandler) GetFertilizerById(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, response)
 	}
 
-	response := helper.APIResponse("Fertilizer fetched successfully", http.StatusOK, "success", category)
+	res := fertilizer.NewFertilizerResponse(*category)
+
+	response := helper.APIResponse("Fertilizer fetched successfully", http.StatusOK, "success", res)
 	return c.JSON(http.StatusOK, response)
 }
 
@@ -73,13 +80,17 @@ func (h *FertilizerHandler) CreateFertilizer(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response)
 	}
 
-	//  fertilizer, err = h.service.CreateFertilizer(input)
-	// if err != nil {
-	// 	response := helper.APIResponse("Failed to create fertilizer", http.StatusInternalServerError, "error", nil)
-	// 	return c.JSON(http.StatusInternalServerError, response)
-	// }
+	mapped := fertilizer.NewFertilizerInput(input)
 
-	response := helper.APIResponse("Fertilizer created successfully", http.StatusCreated, "success", nil)
+	data, err := h.service.CreateFertilizer(mapped)
+	if err != nil {
+		response := helper.APIResponse("Failed to create fertilizer", http.StatusInternalServerError, "error", nil)
+		return c.JSON(http.StatusInternalServerError, response)
+	}
+
+	res := fertilizer.NewFertilizerResponse(*data)
+
+	response := helper.APIResponse("Fertilizer created successfully", http.StatusCreated, "success", res)
 	return c.JSON(http.StatusCreated, response)
 }
 
@@ -112,13 +123,15 @@ func (h *FertilizerHandler) UpdateFertilizer(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response)
 	}
 
-	category, err := h.service.UpdateFertilizer(id, input)
+	mapped := fertilizer.NewFertilizerInput(input)
+
+	err = h.service.UpdateFertilizer(id, mapped)
 	if err != nil {
 		response := helper.APIResponse("Failed to update fertilizer", http.StatusInternalServerError, "error", nil)
 		return c.JSON(http.StatusInternalServerError, response)
 	}
 
-	response := helper.APIResponse("Fertilizer updated successfully", http.StatusOK, "success", category)
+	response := helper.APIResponse("Fertilizer updated successfully", http.StatusOK, "success", "Success update fertilizer")
 	return c.JSON(http.StatusOK, response)
 }
 

@@ -1,11 +1,11 @@
 package fertilizer
 
 type FertilizerService interface {
-	CreateFertilizer(input FertilizerInput) (FertilizerResponse, error)
-	GetFertilizer() ([]FertilizerResponse, error)
-	GetFertilizerByID(id int) (FertilizerResponse, error)
+	CreateFertilizer(*Fertilizer) (*Fertilizer, error)
+	GetFertilizer() ([]Fertilizer, error)
+	GetFertilizerByID(id int) (*Fertilizer, error)
 	DeleteFertilizer(id int) error
-	UpdateFertilizer(id int, input FertilizerInput) (FertilizerResponse, error)
+	UpdateFertilizer(id int, fertilizer *Fertilizer) error
 }
 
 type fertilizerService struct {
@@ -16,68 +16,39 @@ func NewFertilizerService(repository FertilizerRepository) FertilizerService {
 	return &fertilizerService{repository}
 }
 
-func (s *fertilizerService) GetFertilizer() ([]FertilizerResponse, error) {
-	categories, err := s.repository.GetFertilizer()
+func (s *fertilizerService) GetFertilizer() ([]Fertilizer, error) {
+	fertilizer, err := s.repository.GetFertilizer()
+	if err != nil {
+		return nil, err
+	}
+	return fertilizer, nil
+}
+
+func (s *fertilizerService) GetFertilizerByID(id int) (*Fertilizer, error) {
+	fertilizer, err := s.repository.GetFertilizerByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return &fertilizer, nil
+}
+
+func (s *fertilizerService) CreateFertilizer(fertilizer *Fertilizer) (*Fertilizer, error) {
+	fertilizer, err := s.repository.CreateFertilizer(fertilizer)
 	if err != nil {
 		return nil, err
 	}
 
-	var responses []FertilizerResponse
-	for _, category := range categories {
-		responses = append(responses, NewFertilizerResponse(category))
-	}
-
-	return responses, nil
+	return fertilizer, nil
 }
 
-func (s *fertilizerService) GetFertilizerByID(id int) (FertilizerResponse, error) {
-	category, err := s.repository.GetFertilizerByID(id)
-	if err != nil {
-		return FertilizerResponse{}, err
-	}
-
-	return NewFertilizerResponse(category), nil
-}
-
-// UpdateFertilizer implements FertilizerService.
-func (s *fertilizerService) UpdateFertilizer(id int, input FertilizerInput) (FertilizerResponse, error) {
-	category, err := s.repository.GetFertilizerByID(id)
-	if err != nil {
-		return FertilizerResponse{}, err
-	}
-	category.Id = input.Id
-	category.Name = input.Name
-	category.Compostition = input.Compostition
-	category.CreateAt = input.CreateAt
-
-	updatedCategory, err := s.repository.UpdateFertilizer(category)
-	if err != nil {
-		return FertilizerResponse{}, err
-	}
-
-	return NewFertilizerResponse(updatedCategory), nil
-}
-
-func (s *fertilizerService) CreateFertilizer(input FertilizerInput) (FertilizerResponse, error) {
-	category := Fertilizer{
-		Id:           input.Id,
-		Name:         input.Name,
-		Compostition: input.Compostition,
-		CreateAt:     input.CreateAt,
-	}
-	newCategory, err := s.repository.CreateFertilizer(category)
-	if err != nil {
-		return FertilizerResponse{}, err
-	}
-
-	return NewFertilizerResponse(newCategory), nil
-}
-
-func (s *fertilizerService) DeleteFertilizer(id int) error {
-	category, err := s.repository.GetFertilizerByID(id)
+func (s *fertilizerService) UpdateFertilizer(id int, fertilizer *Fertilizer) error {
+	_, err := s.repository.UpdateFertilizer(id, fertilizer)
 	if err != nil {
 		return err
 	}
+	return nil
+}
 
-	return s.repository.DeleteFertilizer(category)
+func (s *fertilizerService) DeleteFertilizer(id int) error {
+	return s.repository.DeleteFertilizer(id)
 }
