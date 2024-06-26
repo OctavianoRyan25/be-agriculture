@@ -1,5 +1,7 @@
 package fertilizer
 
+import "time"
+
 type FertilizerService interface {
 	CreateFertilizer(*Fertilizer) (*Fertilizer, error)
 	GetFertilizer() ([]Fertilizer, error)
@@ -33,6 +35,9 @@ func (s *fertilizerService) GetFertilizerByID(id int) (*Fertilizer, error) {
 }
 
 func (s *fertilizerService) CreateFertilizer(fertilizer *Fertilizer) (*Fertilizer, error) {
+	location, _ := time.LoadLocation("Asia/Jakarta")
+	fertilizer.CreateAt = time.Now().In(location)
+	fertilizer.UpdatedAt = time.Now().In(location)
 	fertilizer, err := s.repository.CreateFertilizer(fertilizer)
 	if err != nil {
 		return nil, err
@@ -42,6 +47,8 @@ func (s *fertilizerService) CreateFertilizer(fertilizer *Fertilizer) (*Fertilize
 }
 
 func (s *fertilizerService) UpdateFertilizer(id int, fertilizer *Fertilizer) error {
+	location, _ := time.LoadLocation("Asia/Jakarta")
+	fertilizer.UpdatedAt = time.Now().In(location)
 	_, err := s.repository.UpdateFertilizer(id, fertilizer)
 	if err != nil {
 		return err

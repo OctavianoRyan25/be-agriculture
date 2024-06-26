@@ -13,4 +13,5 @@ type Fertilizer struct {
 	Plant        plant.Plant `json:"plant"`
 	Compostition string      `json:"compostition"`
 	CreateAt     time.Time   `json:"createAt"`
+	UpdatedAt    time.Time   `json:"updatedAt"`
 }
