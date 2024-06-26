@@ -82,15 +82,13 @@ func (h *FertilizerHandler) CreateFertilizer(c echo.Context) error {
 
 	mapped := fertilizer.NewFertilizerInput(input)
 
-	data, err := h.service.CreateFertilizer(mapped)
+	_, err := h.service.CreateFertilizer(mapped)
 	if err != nil {
 		response := helper.APIResponse("Failed to create fertilizer", http.StatusInternalServerError, "error", nil)
 		return c.JSON(http.StatusInternalServerError, response)
 	}
 
-	res := fertilizer.NewFertilizerResponse(*data)
-
-	response := helper.APIResponse("Fertilizer created successfully", http.StatusCreated, "success", res)
+	response := helper.APIResponse("Fertilizer created successfully", http.StatusCreated, "success", "Success create fertilizer")
 	return c.JSON(http.StatusCreated, response)
 }
 
